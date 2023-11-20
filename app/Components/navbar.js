@@ -32,7 +32,7 @@ export default function Navbar() {
     return (
         <nav className="flex filter drop-shadow-md bg-white px-4 py-4 h-20 items-center" style={{backgroundColor:'black'}}>
             <MobileNav open={open} setOpen={setOpen}/>
-            <div className="w-3/12 flex items-center" style={{marginLeft:"18px"}}>
+            <div className="w-3/12 flex items-center" style={{marginLeft:"38px"}}>
             <Image
           className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
           src="/login_cover.png"
@@ -60,9 +60,9 @@ export default function Navbar() {
                 <NavLink to="/about">
                         MY ACTIONS
                     </NavLink>
-                    <NavLink to="/about">
+                    <NavLink to="/Leads">
                         NEW LEADS
-                    </NavLink><NavLink to="/contact">
+                    </NavLink><NavLink to="/Contacts">
                         MY CONTACTS
                     </NavLink>
                     <NavLink to="/contact">

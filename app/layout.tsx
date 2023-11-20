@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
-//import Navbar from '../app/Components/navbar'
+import Navbar from '../app/Components/navbar'
+import Footer from '../app/Components/footer'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import dynamic from 'next/dynamic';
 
 const DynamicNavbar = dynamic(() => import('../app/Components/navbar'), { ssr: false });
+const DynamicFooter = dynamic(() => import('../app/Components/footer'), { ssr: false });
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
@@ -18,10 +20,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      
+    <html>
       <DynamicNavbar/>
+      
       <body className={inter.className}>{children}</body>
-    </html>
+
+      </html>
   )
 }
