@@ -4,7 +4,7 @@ import { components } from '@/interfaces/db_interfaces';
 import { ContactType } from '@/interfaces/enums';
 import { HttpMethod, getData } from '@/utils/api';
 import { isRefreshTokenExpired } from '@/utils/auth';
-import { formatNumber } from '@/utils/format';
+import { formatBudgetRange, formatNumber } from '@/utils/format';
 import AddIcon from '@mui/icons-material/Add';
 import { Fab, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box';
@@ -13,6 +13,7 @@ import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
 import Grid from '@mui/material/Unstable_Grid2';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 export default function HomePage() {
@@ -177,9 +178,11 @@ export default function HomePage() {
           </FormControl>
         </Grid>
         <Grid sx={{ mx: 2 }} alignItems='center' container item>
-          <Fab color="primary" aria-label="add">
-            <AddIcon />
-          </Fab>
+          <Link href="/leads/add" passHref>
+            <Fab color="primary" aria-label="add">
+              <AddIcon />
+            </Fab>
+          </Link>
         </Grid>
         {/* Add more dropdowns or filters as needed */}
       </Grid>
@@ -194,9 +197,7 @@ export default function HomePage() {
               jobTitle={lead.job_title.title}
               areaType={lead.interests[0].property_type.type}
               budgetRange={
-                formatNumber(lead.interests[0].budget_range.min) +
-                '-' +
-                formatNumber(lead.interests[0].budget_range.max)
+                formatBudgetRange(lead.interests[0].budget_range)
               }
               contactType={ContactType.LEAD}
             />

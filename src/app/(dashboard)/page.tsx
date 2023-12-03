@@ -1,7 +1,6 @@
 "use client"
-import ContactCard from '@/components/ContactsCard';
+import ActionsCard from '@/components/ActionsCard';
 import { components } from '@/interfaces/db_interfaces';
-import { ContactType } from '@/interfaces/enums';
 import { HttpMethod, getData } from '@/utils/api';
 import { isRefreshTokenExpired } from '@/utils/auth';
 import AddIcon from '@mui/icons-material/Add';
@@ -44,7 +43,7 @@ export default function HomePage() {
       console.log(actionsData);
     }
     fetchData();
-  }, [date]);
+  }, [date, searchText]);
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -80,21 +79,38 @@ export default function HomePage() {
             {actions?.calls?.map((call) => (
               <Grid key={call.id} item>
                 {call.sales_account ? (
-                  <ContactCard name={call.sales_account.name} phone={call.sales_account.phone} contactType={ContactType.SALES} />
+                  <ActionsCard time={(new Date(call.date ? call.date : new Date())).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true,
+                  })} name={call.sales_account.name} phone={call.sales_account.phone} />
                 ) : (
-                  <ContactCard name={call.company_account.name} phone={call.company_account?.phone} contactType={ContactType.COMPANY} />
+                  <ActionsCard time={(new Date(call.date ? call.date : new Date())).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true,
+                  })} name={call.company_account.name} phone={call.company_account.phone} />
                 )}
 
               </Grid>
             ))}
           </Grid>
           <Grid item>
+            <h3>Meetings</h3>
             {actions?.meetings?.map((meeting) => (
               <Grid key={meeting.id} item>
                 {meeting.sales_account ? (
-                  <ContactCard name={meeting.sales_account.name} phone={meeting.sales_account.phone} contactType={ContactType.SALES} />
+                  <ActionsCard time={(new Date(meeting.date ? meeting.date : new Date())).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true,
+                  })} name={meeting.sales_account.name} phone={meeting.sales_account.phone} />
                 ) : (
-                  <ContactCard name={meeting.company_account.name} phone={meeting.company_account?.phone} contactType={ContactType.COMPANY} />
+                  <ActionsCard time={(new Date(meeting.date ? meeting.date : new Date())).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true,
+                  })} name={meeting.company_account.name} phone={meeting.company_account.phone} />
                 )}
               </Grid>
             ))}

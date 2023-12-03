@@ -73,7 +73,7 @@ const ContactCard: React.FC<ContactCardProps> = ({ name, email, phone, jobTitle,
                     </Menu>
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 2, flex: '1', width: '100%' }}>
-                    {/*<Divider variant='middle' sx={{ bgcolor: "#000000", borderRadius: 5 }} />*/}q
+                    {/*<Divider variant='middle' sx={{ bgcolor: "#000000", borderRadius: 5 }} />*/}
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <PhoneIcon color="action" sx={{ mr: 1 }} />
                         <Typography variant="body2">{phone}</Typography>
@@ -101,8 +101,12 @@ const ContactCard: React.FC<ContactCardProps> = ({ name, email, phone, jobTitle,
 
             <CardActions sx={{ bgcolor: 'background.level1', justifyContent: 'center', mt: 'auto' }}>
                 <ButtonGroup variant="outlined" sx={{ width: '100%' }}>
-                    <Button sx={{ flex: '1 1 0' }}>Message</Button>
-                    <Button sx={{ flex: '1 1 0' }}>Connect</Button>
+                    <Button sx={{ flex: '1 1 0' }} onClick={() => {
+                        window.open(`https://wa.me/${phone}`, '_blank');
+                    }}>
+                        WhatsApp
+                    </Button>
+                    <Button sx={{ flex: '1 1 0' }}>View</Button>
                 </ButtonGroup>
             </CardActions>
         </Card>

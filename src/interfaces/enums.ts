@@ -1,11 +1,16 @@
 export enum ContactType {
-    LEAD = "Lead",
-    COMPANY = "Company",
-    SALES = "Sales",
+  LEAD = "Lead",
+  COMPANY = "Company",
+  SALES = "Sales",
 }
 
 export enum AccountStatus {
-    HOT = 1,
-    WARM = 2,
-    COLD = 3,
+  HOT = 1,
+  WARM = 2,
+  COLD = 3,
+}
+
+export enum Gender {
+  MALE = "male",
+  FEMALE = "female",
 }
