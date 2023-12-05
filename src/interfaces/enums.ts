@@ -1,7 +1,7 @@
 export enum ContactType {
-  LEAD = "Lead",
-  COMPANY = "Company",
-  SALES = "Sales",
+  LEAD = "lead",
+  COMPANY = "company",
+  SALES = "sales",
 }
 
 export enum AccountStatus {
@@ -13,4 +13,15 @@ export enum AccountStatus {
 export enum Gender {
   MALE = "male",
   FEMALE = "female",
+}
+
+export enum AccountType {
+  COMPANY = "company",
+  SALES = "sales",
+}
+
+export enum ActionType {
+  CALL = "call",
+  MEETING = "meeting",
+  TEXT = "text",
 }

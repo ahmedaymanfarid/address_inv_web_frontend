@@ -2,7 +2,7 @@
 
 import { jwtDecode, JwtPayload } from "jwt-decode";
 
-export const signin = async  (
+export const signin = async (
   username: string,
   password: string
 ): Promise<void> => {
@@ -78,8 +78,6 @@ export const isRefreshTokenExpired = (): boolean => {
 export const refreshTokens = async () => {
   const refreshToken = getRefreshToken();
   if (!refreshToken || isRefreshTokenExpired()) {
-    // If the refresh token is expired or not available, redirect to login
-    window.location.href = "/login";
     return null;
   }
 
@@ -97,7 +95,6 @@ export const refreshTokens = async () => {
 
   if (!response.ok) {
     // Handle the case where the refresh request fails
-    window.location.href = "/login";
     return null;
   }
 
@@ -117,7 +114,7 @@ export const signout = (): void => {
 
   // Redirect to the home page
   window.location.href = "/sign-in";
-}
+};
 
 export const getValidToken = async (): Promise<string | null> => {
   let accessToken = getAccessToken();
