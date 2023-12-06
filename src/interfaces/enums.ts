@@ -25,3 +25,9 @@ export enum ActionType {
   MEETING = "meeting",
   TEXT = "text",
 }
+
+export enum LeadStatus {
+  ASSIGNED = 1,
+  NOT_ASSIGNED = 2,
+  ACTION_TAKEN = 3,
+}

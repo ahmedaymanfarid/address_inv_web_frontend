@@ -23,6 +23,8 @@ export default function TasksPage() {
     window.location.href = "/sign-in";
   }
 
+  const [firstLoad, setFirstLoad] = useState<boolean>(true);
+
   const [companyAccounts, setCompanyAccounts] = useState<
     components["schemas"]["CompanyAccount"][]
   >([]);
@@ -71,6 +73,20 @@ export default function TasksPage() {
     setDeliveryRange(event.target.value);
   };
   useEffect(() => {
+    const fetchFirstData = async () => {
+      const budgetData = await getData("/budget_ranges/");
+      SetBudgetRanges(budgetData);
+      const propertyData = await getData("/property_types/");
+      setPropertyTypes(propertyData);
+      const deliveryData = await getData("/delivery_ranges/");
+      setDeliveryRanges(deliveryData);
+      setFirstLoad(false);
+    };
+
+    if (firstLoad) {
+      fetchFirstData();
+    }
+
     const fetchData = async () => {
       try {
         let params: { [key: string]: any } = {};
@@ -101,12 +117,6 @@ export default function TasksPage() {
           params
         );
         setCompanyAccounts(companyAccountsData);
-        const budgetData = await getData("/budget_ranges/");
-        SetBudgetRanges(budgetData);
-        const propertyData = await getData("/property_types/");
-        setPropertyTypes(propertyData);
-        const deliveryData = await getData("/delivery_ranges/");
-        setDeliveryRanges(deliveryData);
       } catch (error) {
         console.error("Error fetching leads:", error);
       }
@@ -224,6 +234,7 @@ export default function TasksPage() {
                     formatNumber(account.lead.interests[0].budget_range.max)
                   }
                   contactType={ContactType.COMPANY}
+                  assignedToName={account.assigned_to?.name}
                 />
               </Grid>
             ))}
@@ -246,6 +257,7 @@ export default function TasksPage() {
                     formatNumber(account.interests[0].budget_range.max)
                   }
                   contactType={ContactType.SALES}
+                  assignedToName={account.assigned_to?.name}
                 />
               </Grid>
             ))}
@@ -278,6 +290,7 @@ export default function TasksPage() {
                     formatNumber(account.lead.interests[0].budget_range.max)
                   }
                   contactType={ContactType.COMPANY}
+                  assignedToName={account.assigned_to?.name}
                 />
               </Grid>
             ))}
@@ -300,6 +313,7 @@ export default function TasksPage() {
                     formatNumber(account.interests[0].budget_range.max)
                   }
                   contactType={ContactType.SALES}
+                  assignedToName={account.assigned_to?.name}
                 />
               </Grid>
             ))}
@@ -332,6 +346,7 @@ export default function TasksPage() {
                     formatNumber(account.lead.interests[0].budget_range.max)
                   }
                   contactType={ContactType.COMPANY}
+                  assignedToName={account.assigned_to?.name}
                 />
               </Grid>
             ))}
@@ -354,6 +369,7 @@ export default function TasksPage() {
                     formatNumber(account.interests[0].budget_range.max)
                   }
                   contactType={ContactType.SALES}
+                  assignedToName={account.assigned_to?.name}
                 />
               </Grid>
             ))}
@@ -386,6 +402,7 @@ export default function TasksPage() {
                     formatNumber(account.lead.interests[0].budget_range.max)
                   }
                   contactType={ContactType.COMPANY}
+                  assignedToName={account.assigned_to?.name}
                 />
               </Grid>
             ))}
@@ -408,6 +425,7 @@ export default function TasksPage() {
                     formatNumber(account.interests[0].budget_range.max)
                   }
                   contactType={ContactType.SALES}
+                  assignedToName={account.assigned_to?.name}
                 />
               </Grid>
             ))}

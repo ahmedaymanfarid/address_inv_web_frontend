@@ -1,10 +1,12 @@
 "use client";
-import { ContactType } from "@/interfaces/enums";
+import { components } from "@/interfaces/db_interfaces";
+import { AccountStatus, ContactType, LeadStatus } from "@/interfaces/enums";
 import { HttpMethod, getData } from "@/utils/api";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import EmailIcon from "@mui/icons-material/Email";
 import HouseIcon from "@mui/icons-material/House";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import PersonIcon from "@mui/icons-material/Person";
 import PhoneIcon from "@mui/icons-material/Phone";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -16,6 +18,8 @@ import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
+import Popover from "@mui/material/Popover";
+import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Link from "next/link";
 import React from "react";
@@ -28,6 +32,9 @@ interface ContactCardProps {
   budgetRange?: string;
   contactType: ContactType;
   assignedTo?: number;
+  assignedToName?: string;
+  employees?: components["schemas"]["Employee"][];
+  leadStatus?: LeadStatus;
 }
 
 const ContactCard: React.FC<ContactCardProps> = ({
@@ -39,22 +46,86 @@ const ContactCard: React.FC<ContactCardProps> = ({
   budgetRange,
   contactType,
   assignedTo,
+  assignedToName,
+  employees,
+  leadStatus,
 }) => {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [menuAnchor, setMenuAnchor] = React.useState<null | HTMLElement>(null);
+  const [assignOpen, setAssignOpen] = React.useState(false);
+  const [assignedSelected, setAssignedSelected] = React.useState<number>();
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
+  const [statusChangeOpen, setStatusChangeOpen] = React.useState(false);
+  const [status, setStatus] = React.useState<AccountStatus>();
+
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setMenuAnchor(event.currentTarget);
   };
 
-  const handleClose = () => {
-    setAnchorEl(null);
+  const handleAssignClick = (event: React.MouseEvent<HTMLElement>) => {
+    handleMenuClose();
+    setAssignOpen(true);
+  };
+
+  const handleStatusChangeClick = (event: React.MouseEvent<HTMLElement>) => {
+    handleMenuClose();
+    setStatusChangeOpen(true);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchor(null);
+
+    // handleAssignClose();
+  };
+
+  const handleAssignClose = () => {
+    setAssignOpen(false);
+  };
+
+  const handleStausChangeClose = () => {
+    setStatusChangeOpen(false);
+  };
+
+  const handleAssign = async (event: any) => {
+    await getData("/leads/rotate", HttpMethod.POST, {
+      lead_phone: phone,
+      to: assignedSelected,
+    });
+    handleAssignClose();
+    window.location.reload();
   };
 
   const handleUnassign = async () => {
     await getData("/leads/rotate", HttpMethod.POST, {
       lead_phone: phone,
     });
-    handleClose();
+    handleMenuClose();
+    window.location.reload();
+  };
+
+  const handleStatusChange = async () => {
+    if (status) {
+      if (contactType == ContactType.SALES) {
+        await getData("/accounts/sales/status", HttpMethod.PUT, {
+          assigned_to: assignedTo,
+          phone: phone,
+          status_id: status,
+        });
+      } else if (contactType == ContactType.COMPANY) {
+        await getData("/accounts/company/status", HttpMethod.PUT, {
+          phone: phone,
+          assigned_to: assignedTo,
+          status_id: status,
+        });
+      }
+    }
+    handleStausChangeClose();
+    window.location.reload();
+  };
+
+  const calculateMiddlePosition = () => {
+    const middleX = window.innerWidth / 2;
+    const middleY = window.innerHeight / 2;
+    return { top: middleY, left: middleX };
   };
 
   return (
@@ -63,7 +134,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
         marginBottom: 2,
         width: 320,
         maxWidth: "100%",
-        height: 270,
+        height: 305,
         maxHeight: "100%",
         display: "flex",
         flexDirection: "column",
@@ -116,21 +187,38 @@ const ContactCard: React.FC<ContactCardProps> = ({
             </Typography>
           </Box>
           <Box>
-            {contactType === ContactType.LEAD ? (
-              <Chip label="Lead" color="warning" size="small" />
-            ) : contactType === ContactType.COMPANY ? (
+            {contactType === ContactType.COMPANY ? (
               <Chip label="Company" color="primary" size="small" />
             ) : contactType === ContactType.SALES ? (
               <Chip label="Sales" color="success" size="small" />
             ) : null}
+            {contactType === ContactType.LEAD && (
+              <Chip
+                label={
+                  leadStatus === LeadStatus.ASSIGNED
+                    ? "Assigned"
+                    : leadStatus === LeadStatus.NOT_ASSIGNED
+                    ? "Not Assigned"
+                    : "Action Taken"
+                }
+                color={
+                  leadStatus === LeadStatus.ASSIGNED
+                    ? "error"
+                    : leadStatus === LeadStatus.NOT_ASSIGNED
+                    ? "warning"
+                    : "success"
+                }
+                size="small"
+              />
+            )}
           </Box>
-          <IconButton onClick={handleClick}>
+          <IconButton onClick={handleMenuClick}>
             <MoreVertIcon />
           </IconButton>
           <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleClose}
+            anchorEl={menuAnchor}
+            open={Boolean(menuAnchor)}
+            onClose={handleMenuClose}
           >
             {/* Add menu items as needed */}
             {contactType != ContactType.LEAD && (
@@ -151,10 +239,20 @@ const ContactCard: React.FC<ContactCardProps> = ({
                 </Link>
               </MenuItem>
             )}
-            {contactType == ContactType.LEAD && <MenuItem>Assign</MenuItem>}
-            {contactType == ContactType.LEAD && (
-              <MenuItem onClick={handleUnassign}>Unassign</MenuItem>
+            {contactType != ContactType.LEAD && (
+              <MenuItem onClick={handleStatusChangeClick}>
+                Change status
+              </MenuItem>
             )}
+            {contactType == ContactType.LEAD && (
+              <MenuItem onClick={handleAssignClick}>
+                {leadStatus == LeadStatus.NOT_ASSIGNED ? "Assign" : "Rotate"}
+              </MenuItem>
+            )}
+            {contactType == ContactType.LEAD &&
+              leadStatus != LeadStatus.NOT_ASSIGNED && (
+                <MenuItem onClick={handleUnassign}>Unassign</MenuItem>
+              )}
             {/* <MenuItem onClick={handleClose}>Option 2</MenuItem> */}
           </Menu>
         </Box>
@@ -164,6 +262,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
             flexDirection: "column",
             gap: 1,
             mt: 2,
+            mb: 0,
             flex: "1",
             width: "100%",
           }}
@@ -191,7 +290,97 @@ const ContactCard: React.FC<ContactCardProps> = ({
               <Typography variant="body2">{budgetRange}</Typography>
             </Box>
           )}
+          {assignedToName && (
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <PersonIcon color="action" sx={{ mr: 1 }} />
+              <Typography variant="body2">{assignedToName}</Typography>
+            </Box>
+          )}
         </Box>
+        <Popover
+          open={assignOpen}
+          anchorReference="anchorPosition"
+          anchorPosition={calculateMiddlePosition()}
+          anchorOrigin={{
+            vertical: "center",
+            horizontal: "center",
+          }}
+          transformOrigin={{
+            vertical: "center",
+            horizontal: "center",
+          }}
+        >
+          <Card sx={{ elevation: 6 }}>
+            <CardContent sx={{ justifyContent: "center" }}>
+              <TextField
+                value={assignedSelected}
+                sx={{ width: 200 }}
+                label="Assign To"
+                onChange={(event) =>
+                  setAssignedSelected(parseInt(event.target.value))
+                }
+                select
+              >
+                {employees?.map((employee) => (
+                  <MenuItem key={employee.id} value={employee.id}>
+                    {employee.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </CardContent>
+            <CardActions sx={{ justifyContent: "center" }}>
+              <Button variant="contained" onClick={handleAssign}>
+                Assign
+              </Button>
+              <Button variant="outlined" onClick={handleAssignClose}>
+                Cancel
+              </Button>
+            </CardActions>
+          </Card>
+        </Popover>
+        <Popover
+          open={statusChangeOpen}
+          anchorReference="anchorPosition"
+          anchorPosition={calculateMiddlePosition()}
+          anchorOrigin={{
+            vertical: "center",
+            horizontal: "center",
+          }}
+          transformOrigin={{
+            vertical: "center",
+            horizontal: "center",
+          }}
+        >
+          <Card sx={{ elevation: 6 }}>
+            <CardContent sx={{ justifyContent: "center" }}>
+              <TextField
+                value={status}
+                sx={{ width: 200 }}
+                label="Status"
+                onChange={(event) => setStatus(parseInt(event.target.value))}
+                select
+              >
+                <MenuItem key={AccountStatus.HOT} value={AccountStatus.HOT}>
+                  Hot
+                </MenuItem>
+                <MenuItem key={AccountStatus.WARM} value={AccountStatus.WARM}>
+                  Warm
+                </MenuItem>
+                <MenuItem key={AccountStatus.COLD} value={AccountStatus.COLD}>
+                  Cold
+                </MenuItem>
+              </TextField>
+            </CardContent>
+            <CardActions sx={{ justifyContent: "center" }}>
+              <Button variant="contained" onClick={handleStatusChange}>
+                Assign
+              </Button>
+              <Button variant="outlined" onClick={handleStausChangeClose}>
+                Cancel
+              </Button>
+            </CardActions>
+          </Card>
+        </Popover>
       </CardContent>
 
       <CardActions

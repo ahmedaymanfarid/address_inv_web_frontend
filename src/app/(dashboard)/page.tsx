@@ -72,7 +72,7 @@ export default function HomePage() {
         </Grid>
 
         <Grid container rowSpacing={3} columnSpacing={3}>
-          <Grid xs={12} sm={6} md={4} lg={3} item>
+          <Grid item xs={12} sm={8} md={6} lg={4}>
             <h3>Calls</h3>
             {actions?.calls?.map((call) => (
               <Grid key={call.id} item>
