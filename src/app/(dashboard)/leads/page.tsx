@@ -145,7 +145,7 @@ export default function HomePage() {
         </Grid>
         <Grid item>
           <FormControl variant="outlined">
-            <InputLabel>Location Type</InputLabel>
+            <InputLabel>Unit Type</InputLabel>
             <Select
               sx={{ minWidth: 200 }}
               value={propertyType}
