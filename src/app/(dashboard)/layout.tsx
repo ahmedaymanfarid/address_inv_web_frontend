@@ -1,61 +1,68 @@
-import LogOutItem from '@/components/LogoutItem';
-import ThemeRegistry from '@/components/ThemeRegistry/ThemeRegistry';
-import AccountBoxIcon from '@mui/icons-material/AccountBox';
-import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
-import ContactsIcon from '@mui/icons-material/Contacts';
-import LogoutIcon from '@mui/icons-material/Logout';
-import RingVolumeIcon from '@mui/icons-material/RingVolume';
-import SupportIcon from '@mui/icons-material/Support';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Divider from '@mui/material/Divider';
-import Drawer from '@mui/material/Drawer';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import Toolbar from '@mui/material/Toolbar';
-import Image from 'next/image';
-import Link from 'next/link';
-import * as React from 'react';
+import LogOutItem from "@/components/LogoutItem";
+import ThemeRegistry from "@/components/ThemeRegistry/ThemeRegistry";
+import AccountBoxIcon from "@mui/icons-material/AccountBox";
+import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
+import ContactsIcon from "@mui/icons-material/Contacts";
+import LogoutIcon from "@mui/icons-material/Logout";
+import RingVolumeIcon from "@mui/icons-material/RingVolume";
+import SupportIcon from "@mui/icons-material/Support";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Divider from "@mui/material/Divider";
+import Drawer from "@mui/material/Drawer";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Toolbar from "@mui/material/Toolbar";
+import Image from "next/image";
+import Link from "next/link";
+import * as React from "react";
 
 export const metadata = {
-  title: 'Next.js App Router + Material UI v5',
-  description: 'Next.js App Router + Material UI v5',
+  title: "Next.js App Router + Material UI v5",
+  description: "Next.js App Router + Material UI v5",
 };
 
 const DRAWER_WIDTH = 220;
 
 const LINKS = [
-  { text: 'Actions', href: '/', icon: RingVolumeIcon },
-  { text: 'New Leads', href: '/leads', icon: AssignmentIndIcon },
-  { text: 'Accounts', href: '/accounts', icon: ContactsIcon },
+  { text: "Actions", href: "/", icon: RingVolumeIcon },
+  { text: "Leads", href: "/leads", icon: AssignmentIndIcon },
+  { text: "Accounts", href: "/accounts", icon: ContactsIcon },
 ];
 
-const PLACEHOLDER_LINKS = [
-  { text: 'My Profile', icon: SupportIcon },
-];
+const PLACEHOLDER_LINKS = [{ text: "My Profile", icon: SupportIcon }];
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <body>
         <ThemeRegistry>
           <AppBar position="fixed" sx={{ zIndex: 2000 }}>
-            <Toolbar sx={{ backgroundColor: 'black' }}>
-              <Image src="/address_logo.png" alt="Address Logo" width={189} height={70} />
+            <Toolbar sx={{ backgroundColor: "black" }}>
+              <Image
+                src="/address_logo.png"
+                alt="Address Logo"
+                width={189}
+                height={70}
+              />
             </Toolbar>
           </AppBar>
           <Drawer
             sx={{
               width: DRAWER_WIDTH,
               flexShrink: 0,
-              '& .MuiDrawer-paper': {
+              "& .MuiDrawer-paper": {
                 width: DRAWER_WIDTH,
-                boxSizing: 'border-box',
-                top: ['48px', '56px', '64px'],
-                height: 'auto',
+                boxSizing: "border-box",
+                top: ["48px", "56px", "64px"],
+                height: "auto",
                 bottom: 0,
               },
             }}
@@ -75,7 +82,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </ListItem>
               ))}
             </List>
-            <Divider sx={{ mt: 'auto' }} />
+            <Divider sx={{ mt: "auto" }} />
             <List>
               <ListItem disablePadding>
                 <ListItemButton>
@@ -92,9 +99,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             component="main"
             sx={{
               flexGrow: 1,
-              bgcolor: 'background.default',
+              bgcolor: "background.default",
               ml: `${DRAWER_WIDTH}px`,
-              mt: ['48px', '56px', '64px'],
+              mt: ["48px", "56px", "64px"],
               p: 3,
             }}
           >

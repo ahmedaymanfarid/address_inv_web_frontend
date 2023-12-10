@@ -31,3 +31,11 @@ export enum LeadStatus {
   NOT_ASSIGNED = 2,
   ACTION_TAKEN = 3,
 }
+
+export enum Position {
+  OWNER = 1,
+  TEAM_LEADER = 2,
+  SENIOR = 3,
+  JUNIOR = 4,
+  ADMIN = 5,
+}

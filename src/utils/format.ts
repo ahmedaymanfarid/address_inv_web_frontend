@@ -1,4 +1,5 @@
 import { components } from "@/interfaces/db_interfaces";
+import dayjs, { Dayjs } from "dayjs";
 
 export const formatNumber = (num?: number): string | void => {
   if (!num || isNaN(num)) return "+";
@@ -52,5 +53,16 @@ export const formatDeliveryRange = (
     return `RTM`;
   } else {
     return `${min} years`;
+  }
+};
+
+export const formatReadableDate = (date: Dayjs): string => {
+  const today = dayjs();
+
+  if (date.isSame(today, "day")) {
+    return "today";
+  } else {
+    const formatString = date.year() === today.year() ? "MMM D" : "MMM D, YYYY";
+    return date.format(formatString);
   }
 };

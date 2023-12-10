@@ -1,6 +1,6 @@
 "use client";
 import { components } from "@/interfaces/db_interfaces";
-import { AccountType, ActionType } from "@/interfaces/enums";
+import { AccountStatus, AccountType, ActionType } from "@/interfaces/enums";
 import { HttpMethod, getData } from "@/utils/api";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import { Checkbox, FormControlLabel, Radio, RadioGroup } from "@mui/material";
@@ -61,7 +61,7 @@ export default function AddAction() {
   const [meetingStatuses, setMeetingStatuses] = React.useState<
     components["schemas"]["status"][]
   >([]);
-
+  const [accountStatus, setAccountStatus] = React.useState<AccountStatus>();
   const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAccountEnabled(true);
     setAccountType(event.target.value);

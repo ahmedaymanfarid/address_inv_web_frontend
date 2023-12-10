@@ -3,7 +3,11 @@ import ActionsCard from "@/components/ActionsCard";
 import { components } from "@/interfaces/db_interfaces";
 import { HttpMethod, getData } from "@/utils/api";
 import { isRefreshTokenExpired } from "@/utils/auth";
+import { formatReadableDate } from "@/utils/format";
 import AddIcon from "@mui/icons-material/Add";
+import DoNotDisturbIcon from "@mui/icons-material/DoNotDisturb";
+import TodayIcon from "@mui/icons-material/Today";
+import { Button, LinearProgress, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import Fab from "@mui/material/Fab";
 import TextField from "@mui/material/TextField";
@@ -12,9 +16,9 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import dayjs, { Dayjs } from "dayjs";
+import debounce from "lodash.debounce";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
 export default function HomePage() {
   if (isRefreshTokenExpired()) {
     window.location.href = "/sign-in";
@@ -24,25 +28,53 @@ export default function HomePage() {
   const [searchText, setSearchText] = useState<string>("");
   // default date is today
   const [date, setDate] = useState<Dayjs | null>(dayjs(new Date()));
+
+  const [loading, setLoading] = useState<boolean>(false);
   const handleDateChange = (date: Dayjs | null) => {
     setDate(date);
   };
   const handleSearchChange = (event: any) => {
     setSearchText(event.target.value);
   };
-
+  const [fabColor, setFabColor] = useState<string>("");
   useEffect(() => {
-    // fetch data here
-    const fetchData = async () => {
-      const params = {
-        day: date?.format("YYYY-MM-DD"),
-        search: searchText,
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    const delayedFetch = debounce(() => {
+      const fetchLeadData = async () => {
+        try {
+          setLoading(true);
+          if (date.isSame(new Date(), "day")) setFabColor("primary");
+          else setFabColor("");
+          const params = {
+            day: date?.format("YYYY-MM-DD"),
+            search: searchText,
+          };
+          const actionsData = await getData(
+            "/actions/",
+            HttpMethod.GET,
+            params,
+            undefined,
+            undefined,
+            signal
+          );
+          setActions(actionsData);
+          console.log(actionsData);
+        } catch (error) {
+          console.error("Error fetching leads:", error);
+        } finally {
+          setLoading(false);
+        }
       };
-      const actionsData = await getData("/actions/", HttpMethod.GET, params);
-      setActions(actionsData);
-      console.log(actionsData);
+      fetchLeadData();
+    }, 500);
+    // Call the fetchData function
+    delayedFetch();
+    return () => {
+      delayedFetch.cancel();
+      controller.abort();
     };
-    fetchData();
   }, [date, searchText]);
 
   return (
@@ -59,7 +91,21 @@ export default function HomePage() {
             />
           </Grid>
           <Grid item>
-            <DatePicker value={date} onChange={handleDateChange} />
+            <DatePicker
+              sx={{ minWidth: 200, width: 200 }}
+              value={date}
+              onChange={handleDateChange}
+            />
+          </Grid>
+          <Grid alignItems="center" container item>
+            <Fab
+              sx={{ ml: 2 }}
+              onClick={() => setDate(dayjs(new Date()))}
+              color={fabColor}
+              aria-label="today"
+            >
+              <TodayIcon />
+            </Fab>
           </Grid>
           <Grid sx={{ mx: 2 }} alignItems="center" container item>
             <Link href="/actions/add">
@@ -69,72 +115,110 @@ export default function HomePage() {
             </Link>
           </Grid>
           {/* Add more dropdowns or filters as needed */}
+          {loading && (
+            <Grid item xs={12} alignItems={"center"} textAlign={"center"}>
+              <LinearProgress />
+            </Grid>
+          )}
         </Grid>
 
         <Grid container rowSpacing={3} columnSpacing={3}>
-          <Grid item xs={12} sm={8} md={6} lg={4}>
-            <h3>Calls</h3>
-            {actions?.calls?.map((call) => (
-              <Grid key={call.id} item>
-                {call.sales_account ? (
-                  <ActionsCard
-                    time={new Date(
-                      call.date ? call.date : new Date()
-                    ).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                    })}
-                    name={call.sales_account.name}
-                    phone={call.sales_account.phone}
-                  />
-                ) : (
-                  <ActionsCard
-                    time={new Date(
-                      call.date ? call.date : new Date()
-                    ).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                    })}
-                    name={call.company_account?.lead.name}
-                    phone={call.company_account.phone}
-                  />
-                )}
-              </Grid>
-            ))}
+          <Grid container item xs={12}>
+            <Grid item xs={12}>
+              <h3>Calls</h3>
+            </Grid>
+            {actions?.calls?.length > 0 ? (
+              actions?.calls?.map((call) => (
+                <Grid key={call.id} item>
+                  {call.sales_account ? (
+                    <ActionsCard
+                      time={new Date(
+                        call.date ? call.date : new Date()
+                      ).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
+                      name={call.sales_account.name}
+                      phone={call.sales_account.phone}
+                      assignedToName={call.assigned_to?.name as string}
+                    />
+                  ) : (
+                    <ActionsCard
+                      time={new Date(
+                        call.date ? call.date : new Date()
+                      ).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
+                      name={call.company_account?.lead?.name as string}
+                      phone={call.company_account?.phone as string}
+                      assignedToName={call.assigned_to?.name as string}
+                    />
+                  )}
+                </Grid>
+              ))
+            ) : (
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <DoNotDisturbIcon color="action" sx={{ mr: 1 }} />
+                <Typography color="text.secondary" variant="h5">
+                  No Calls for {formatReadableDate(date)}
+                </Typography>
+              </Box>
+            )}
           </Grid>
-          <Grid xs={12} sm={6} md={4} lg={3} item>
-            <h3>Meetings</h3>
-            {actions?.meetings?.map((meeting) => (
-              <Grid key={meeting.id} item>
-                {meeting.sales_account ? (
-                  <ActionsCard
-                    time={new Date(
-                      meeting.date ? meeting.date : new Date()
-                    ).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                    })}
-                    name={meeting.sales_account.name}
-                    phone={meeting.sales_account.phone}
-                  />
-                ) : (
-                  <ActionsCard
-                    time={new Date(
-                      meeting.date ? meeting.date : new Date()
-                    ).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: true,
-                    })}
-                    name={meeting.company_account.lead.name}
-                    phone={meeting.company_account.phone}
-                  />
-                )}
-              </Grid>
-            ))}
+
+          <Grid container item xs={12}>
+            <Grid item xs={12}>
+              <h3>Meetings</h3>
+            </Grid>
+
+            {actions?.meetings?.length > 0 ? (
+              actions?.meetings?.map((meeting) => (
+                <Grid key={meeting.id} item>
+                  {meeting.sales_account ? (
+                    <ActionsCard
+                      time={new Date(
+                        meeting.date ? meeting.date : new Date()
+                      ).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
+                      name={meeting.sales_account.name}
+                      phone={meeting.sales_account.phone}
+                      assignedToName={meeting.assigned_to?.name as string}
+                    />
+                  ) : (
+                    <ActionsCard
+                      time={new Date(
+                        meeting.date ? meeting.date : new Date()
+                      ).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
+                      name={meeting.company_account?.lead?.name as string}
+                      phone={meeting.company_account?.phone as string}
+                      assignedToName={meeting.assigned_to?.name as string}
+                    />
+                  )}
+                </Grid>
+              ))
+            ) : (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <DoNotDisturbIcon color="action" sx={{ mr: 1 }} />
+                <Typography color="text.secondary" variant="h5">
+                  No Meetings for {formatReadableDate(date)}
+                </Typography>
+              </Box>
+            )}
           </Grid>
         </Grid>
       </Box>

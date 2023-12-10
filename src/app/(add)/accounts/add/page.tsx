@@ -1,7 +1,8 @@
 "use client";
 import { components } from "@/interfaces/db_interfaces";
 import { Gender } from "@/interfaces/enums";
-import { HttpMethod, getData } from "@/utils/api";
+import { AdminOwner } from "@/interfaces/scopes";
+import { HttpMethod, getData, getUser } from "@/utils/api";
 import { formatBudgetRange, formatDeliveryRange } from "@/utils/format";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import Avatar from "@mui/material/Avatar";
@@ -52,6 +53,8 @@ export default function AddLead() {
   const [employees, setEmployees] = React.useState<
     components["schemas"]["Employee"][]
   >([]);
+
+  const [user, setUser] = React.useState<components["schemas"]["Employee"]>();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -137,6 +140,9 @@ export default function AddLead() {
 
   React.useEffect(() => {
     const fetchData = async () => {
+      await getUser().then((data) => {
+        setUser(data);
+      });
       // fetch data here
       await getData("/job_titles/", HttpMethod.GET).then((data) => {
         setJobTitles(data);
@@ -238,21 +244,23 @@ export default function AddLead() {
               </MenuItem>
             ))}
           </TextField>
-          <TextField
-            select
-            margin="normal"
-            fullWidth
-            id="assignedTo"
-            label="Assigned To"
-            name="assignedTo"
-            autoComplete="employee"
-          >
-            {employees.map((employee) => (
-              <MenuItem key={employee.id} value={employee.id}>
-                {employee.name}
-              </MenuItem>
-            ))}
-          </TextField>
+          {AdminOwner.includes(user?.position.id) && (
+            <TextField
+              select
+              margin="normal"
+              fullWidth
+              id="assignedTo"
+              label="Assigned To"
+              name="assignedTo"
+              autoComplete="employee"
+            >
+              {employees.map((employee) => (
+                <MenuItem key={employee.id} value={employee.id}>
+                  {employee.name}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
           <TextField
             select
             required

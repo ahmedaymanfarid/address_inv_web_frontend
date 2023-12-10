@@ -1,5 +1,6 @@
 // utils/auth.ts
 
+import { components } from "@/interfaces/db_interfaces";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 
 export const signin = async (
@@ -111,6 +112,7 @@ export const signout = (): void => {
   // Remove tokens from localStorage
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
+  sessionStorage.removeItem("employee");
 
   // Redirect to the home page
   window.location.href = "/sign-in";

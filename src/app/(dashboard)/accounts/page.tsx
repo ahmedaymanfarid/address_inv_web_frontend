@@ -6,15 +6,19 @@ import { HttpMethod, getData } from "@/utils/api";
 import { isRefreshTokenExpired } from "@/utils/auth";
 import { formatNumber } from "@/utils/format";
 import AddIcon from "@mui/icons-material/Add";
+import DoNotDisturbIcon from "@mui/icons-material/DoNotDisturb";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Fab from "@mui/material/Fab";
 import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
 import InputLabel from "@mui/material/InputLabel";
+import LinearProgress from "@mui/material/LinearProgress";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import debounce from "lodash.debounce";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -24,6 +28,9 @@ export default function TasksPage() {
   }
 
   const [firstLoad, setFirstLoad] = useState<boolean>(true);
+  const [employees, setEmployees] = useState<
+    components["schemas"]["Employee"][]
+  >([]);
 
   const [companyAccounts, setCompanyAccounts] = useState<
     components["schemas"]["CompanyAccount"][]
@@ -72,58 +79,130 @@ export default function TasksPage() {
     setDeliveryRangeID(event.target.value);
     setDeliveryRange(event.target.value);
   };
+
+  const [filtersLoading, setFiltersLoading] = useState<boolean>(false);
+  const [accountLoading, setAccountLoading] = useState<boolean>(false);
+
   useEffect(() => {
-    const fetchFirstData = async () => {
-      const budgetData = await getData("/budget_ranges/");
-      SetBudgetRanges(budgetData);
-      const propertyData = await getData("/property_types/");
-      setPropertyTypes(propertyData);
-      const deliveryData = await getData("/delivery_ranges/");
-      setDeliveryRanges(deliveryData);
-      setFirstLoad(false);
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    const delayedFetch = debounce(() => {
+      const fetchInitialData = async () => {
+        try {
+          setFiltersLoading(true);
+          const budgetData = await getData(
+            "/budget_ranges/",
+            HttpMethod.GET,
+            undefined,
+            undefined,
+            undefined,
+            signal
+          );
+          const propertyData = await getData(
+            "/property_types/",
+            HttpMethod.GET,
+            undefined,
+            undefined,
+            undefined,
+            signal
+          );
+          const deliveryData = await getData(
+            "/delivery_ranges/",
+            HttpMethod.GET,
+            undefined,
+            undefined,
+            undefined,
+            signal
+          );
+          // Handle the result
+          SetBudgetRanges(budgetData);
+          setPropertyTypes(propertyData);
+          setDeliveryRanges(deliveryData);
+          const employeeData = await getData(
+            "/employees/",
+            HttpMethod.GET,
+            undefined,
+            undefined,
+            undefined,
+            signal
+          );
+          setEmployees(employeeData);
+        } catch (error) {
+          // Handle errors
+        } finally {
+          setFiltersLoading(false);
+        }
+      };
+
+      fetchInitialData();
+    }, 500);
+
+    delayedFetch();
+
+    // Cleanup function to cancel the request if component unmounts or state changes
+    return () => {
+      delayedFetch.cancel();
+      controller.abort();
     };
+  }, []);
 
-    if (firstLoad) {
-      fetchFirstData();
-    }
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
 
-    const fetchData = async () => {
-      try {
-        let params: { [key: string]: any } = {};
-        if (searchText != "") {
-          params["search"] = searchText;
+    const delayedFetch = debounce(() => {
+      const fetchLeadData = async () => {
+        try {
+          setAccountLoading(true);
+          let params: { [key: string]: any } = {};
+          if (searchText != "") {
+            params["search"] = searchText;
+          }
+          if (budgetRangeID) {
+            params["budget_range_id"] = budgetRangeID;
+          }
+
+          if (propertyTypeID) {
+            params["property_type_id"] = propertyTypeID;
+          }
+
+          if (deliveryRangeID) {
+            params["delivery_range_id"] = deliveryRangeID;
+          }
+
+          const salesAccountsData = await getData(
+            "/accounts/sales",
+            HttpMethod.GET,
+            params,
+            undefined,
+            undefined,
+            signal
+          );
+          const companyAccountsData = await getData(
+            "/accounts/company",
+            HttpMethod.GET,
+            params,
+            undefined,
+            undefined,
+            signal
+          );
+          setSalesAccounts(salesAccountsData);
+          setCompanyAccounts(companyAccountsData);
+        } catch (error) {
+          console.error("Error fetching leads:", error);
+        } finally {
+          setAccountLoading(false);
         }
-        if (budgetRangeID) {
-          params["budget_range_id"] = budgetRangeID;
-        }
-
-        if (propertyTypeID) {
-          params["property_type_id"] = propertyTypeID;
-        }
-
-        if (deliveryRangeID) {
-          params["delivery_range_id"] = deliveryRangeID;
-        }
-
-        const salesAccountsData = await getData(
-          "/accounts/sales",
-          HttpMethod.GET,
-          params
-        );
-        setSalesAccounts(salesAccountsData);
-        const companyAccountsData = await getData(
-          "/accounts/company",
-          HttpMethod.GET,
-          params
-        );
-        setCompanyAccounts(companyAccountsData);
-      } catch (error) {
-        console.error("Error fetching leads:", error);
-      }
-    };
-
+      };
+      fetchLeadData();
+    }, 500);
     // Call the fetchData function
-    fetchData();
+    delayedFetch();
+    return () => {
+      delayedFetch.cancel();
+      controller.abort();
+    };
   }, [searchText, budgetRangeID, propertyTypeID, deliveryRangeID]);
   return (
     <Box sx={{ display: "flex", flexDirection: "column", padding: 2 }}>
@@ -198,237 +277,336 @@ export default function TasksPage() {
             </Fab>
           </Link>
         </Grid>
+        {(filtersLoading || accountLoading) && (
+          <Grid item xs={12} alignItems={"center"} textAlign={"center"}>
+            <LinearProgress />
+          </Grid>
+        )}
         {/* Add more dropdowns or filters as needed */}
       </Grid>
 
-      <Grid
-        container
-        rowSpacing={3}
-        columnSpacing={{ xs: 1, sm: 2, md: 3, lg: 4 }}
-      >
-        <Grid item xs={12} sm={6} md={4} lg={3}>
-          <h3
-            style={{
-              color: "green",
-            }}
-          >
-            New
-          </h3>
-          <Divider sx={{ mb: 2 }} />
-          {companyAccounts
-            .filter((account) => {
+      <Grid container rowSpacing={3} columnSpacing={2}>
+        <Grid item container columnSpacing={2} xs={12}>
+          <Grid item xs={12}>
+            <h3
+              style={{
+                color: "green",
+              }}
+            >
+              New
+            </h3>
+            <Divider sx={{ mb: 2 }} />
+          </Grid>
+
+          {companyAccounts &&
+            salesAccounts &&
+            companyAccounts.filter((account) => {
               if (account.status_id == undefined) return account;
-            })
-            .map((account: any) => (
-              <Grid key={account.id} item>
-                <ContactCard
-                  name={account.lead.name}
-                  email={account.lead.email}
-                  phone={account.phone}
-                  jobTitle={account.lead.job_title.title}
-                  areaType={account.lead.interests[0].property_type.type}
-                  assignedTo={account.assigned_to_id}
-                  budgetRange={
-                    formatNumber(account.lead.interests[0].budget_range.min) +
-                    "-" +
-                    formatNumber(account.lead.interests[0].budget_range.max)
-                  }
-                  contactType={ContactType.COMPANY}
-                  assignedToName={account.assigned_to?.name}
-                />
-              </Grid>
-            ))}
-          {salesAccounts
-            .filter((account) => {
+            }).length == 0 &&
+            salesAccounts.filter((account) => {
               if (account.status_id == undefined) return account;
-            })
-            .map((account: any) => (
-              <Grid key={account.id} item>
-                <ContactCard
-                  name={account.name}
-                  email={account.email}
-                  phone={account.phone}
-                  jobTitle={account.job_title.title}
-                  assignedTo={account.assigned_to_id}
-                  areaType={account.interests[0].property_type.type}
-                  budgetRange={
-                    formatNumber(account.interests[0].budget_range.min) +
-                    "-" +
-                    formatNumber(account.interests[0].budget_range.max)
-                  }
-                  contactType={ContactType.SALES}
-                  assignedToName={account.assigned_to?.name}
-                />
-              </Grid>
-            ))}
+            }).length == 0 && (
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <DoNotDisturbIcon color="action" sx={{ mr: 1 }} />
+                <Typography color="text.secondary" variant="h5">
+                  Empty
+                </Typography>
+              </Box>
+            )}
+          {companyAccounts &&
+            companyAccounts
+              .filter((account) => {
+                if (account.status_id == undefined) return account;
+              })
+              .map((account: any) => (
+                <Grid key={account.id} item>
+                  <ContactCard
+                    name={account.lead.name}
+                    email={account.lead.email}
+                    phone={account.phone}
+                    jobTitle={account.lead.job_title.title}
+                    areaType={account.lead.interests[0].property_type.type}
+                    assignedTo={account.assigned_to_id}
+                    budgetRange={
+                      formatNumber(account.lead.interests[0].budget_range.min) +
+                      "-" +
+                      formatNumber(account.lead.interests[0].budget_range.max)
+                    }
+                    contactType={ContactType.COMPANY}
+                    assignedToName={account.assigned_to?.name}
+                    leadStatus={account.lead.status.id}
+                    accountStatus={account.status_id}
+                    employees={employees}
+                  />
+                </Grid>
+              ))}
+          {salesAccounts &&
+            salesAccounts
+              .filter((account) => {
+                if (account.status_id == undefined) return account;
+              })
+              .map((account: any) => (
+                <Grid key={account.id} item>
+                  <ContactCard
+                    name={account.name}
+                    email={account.email}
+                    phone={account.phone}
+                    jobTitle={account.job_title.title}
+                    assignedTo={account.assigned_to_id}
+                    areaType={account.interests[0].property_type.type}
+                    budgetRange={
+                      formatNumber(account.interests[0].budget_range.min) +
+                      "-" +
+                      formatNumber(account.interests[0].budget_range.max)
+                    }
+                    contactType={ContactType.SALES}
+                    accountStatus={account.status_id}
+                    assignedToName={account.assigned_to?.name}
+                  />
+                </Grid>
+              ))}
         </Grid>
-        <Grid item xs={12} sm={6} md={4} lg={3}>
-          <h3
-            style={{
-              color: "indianred",
-            }}
-          >
-            Hot
-          </h3>
-          <Divider sx={{ mb: 2 }} />
-          {companyAccounts
-            .filter((account) => {
+
+        <Grid item container columnSpacing={2} xs={12}>
+          <Grid item xs={12}>
+            <h3
+              style={{
+                color: "indianred",
+              }}
+            >
+              Hot
+            </h3>
+            <Divider sx={{ mb: 2 }} />
+          </Grid>
+
+          {companyAccounts &&
+            salesAccounts &&
+            companyAccounts.filter((account) => {
               if (account.status_id == AccountStatus.HOT) return account;
-            })
-            .map((account: any) => (
-              <Grid key={account.id} item>
-                <ContactCard
-                  name={account.lead.name}
-                  email={account.lead.email}
-                  phone={account.phone}
-                  jobTitle={account.lead.job_title.title}
-                  areaType={account.lead.interests[0].property_type.type}
-                  assignedTo={account.assigned_to_id}
-                  budgetRange={
-                    formatNumber(account.lead.interests[0].budget_range.min) +
-                    "-" +
-                    formatNumber(account.lead.interests[0].budget_range.max)
-                  }
-                  contactType={ContactType.COMPANY}
-                  assignedToName={account.assigned_to?.name}
-                />
-              </Grid>
-            ))}
-          {salesAccounts
-            .filter((account) => {
+            }).length == 0 &&
+            salesAccounts.filter((account) => {
               if (account.status_id == AccountStatus.HOT) return account;
-            })
-            .map((account: any) => (
-              <Grid key={account.id} item>
-                <ContactCard
-                  name={account.name}
-                  email={account.email}
-                  phone={account.phone}
-                  jobTitle={account.job_title.title}
-                  areaType={account.interests[0].property_type.type}
-                  assignedTo={account.assigned_to_id}
-                  budgetRange={
-                    formatNumber(account.interests[0].budget_range.min) +
-                    "-" +
-                    formatNumber(account.interests[0].budget_range.max)
-                  }
-                  contactType={ContactType.SALES}
-                  assignedToName={account.assigned_to?.name}
-                />
-              </Grid>
-            ))}
+            }).length == 0 && (
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <DoNotDisturbIcon color="action" sx={{ mr: 1 }} />
+                <Typography color="text.secondary" variant="h5">
+                  Empty
+                </Typography>
+              </Box>
+            )}
+          {companyAccounts &&
+            companyAccounts
+              .filter((account) => {
+                if (account.status_id == AccountStatus.HOT) return account;
+              })
+              .map((account: any) => (
+                <Grid key={account.id} item>
+                  <ContactCard
+                    name={account.lead.name}
+                    email={account.lead.email}
+                    phone={account.phone}
+                    jobTitle={account.lead.job_title.title}
+                    areaType={account.lead.interests[0].property_type.type}
+                    assignedTo={account.assigned_to_id}
+                    budgetRange={
+                      formatNumber(account.lead.interests[0].budget_range.min) +
+                      "-" +
+                      formatNumber(account.lead.interests[0].budget_range.max)
+                    }
+                    contactType={ContactType.COMPANY}
+                    assignedToName={account.assigned_to?.name}
+                    leadStatus={account.lead.status.id}
+                    accountStatus={account.status_id}
+                    employees={employees}
+                  />
+                </Grid>
+              ))}
+          {salesAccounts &&
+            salesAccounts
+              .filter((account) => {
+                if (account.status_id == AccountStatus.HOT) return account;
+              })
+              .map((account: any) => (
+                <Grid key={account.id} item>
+                  <ContactCard
+                    name={account.name}
+                    email={account.email}
+                    phone={account.phone}
+                    jobTitle={account.job_title.title}
+                    areaType={account.interests[0].property_type.type}
+                    assignedTo={account.assigned_to_id}
+                    budgetRange={
+                      formatNumber(account.interests[0].budget_range.min) +
+                      "-" +
+                      formatNumber(account.interests[0].budget_range.max)
+                    }
+                    contactType={ContactType.SALES}
+                    accountStatus={account.status_id}
+                    assignedToName={account.assigned_to?.name}
+                  />
+                </Grid>
+              ))}
         </Grid>
-        <Grid item xs={12} sm={6} md={4} lg={3}>
-          <h3
-            style={{
-              color: "darkorange",
-            }}
-          >
-            Warm
-          </h3>
-          <Divider sx={{ mb: 2 }} />
-          {companyAccounts
-            .filter((account) => {
+        <Grid item container columnSpacing={2} xs={12}>
+          <Grid item xs={12}>
+            <h3
+              style={{
+                color: "darkorange",
+              }}
+            >
+              Warm
+            </h3>
+            <Divider sx={{ mb: 2 }} />
+          </Grid>
+
+          {companyAccounts &&
+            salesAccounts &&
+            companyAccounts.filter((account) => {
               if (account.status_id == AccountStatus.WARM) return account;
-            })
-            .map((account: any) => (
-              <Grid key={account.id} item>
-                <ContactCard
-                  name={account.lead.name}
-                  email={account.lead.email}
-                  phone={account.phone}
-                  jobTitle={account.lead.job_title.title}
-                  areaType={account.lead.interests[0].property_type.type}
-                  assignedTo={account.assigned_to_id}
-                  budgetRange={
-                    formatNumber(account.lead.interests[0].budget_range.min) +
-                    "-" +
-                    formatNumber(account.lead.interests[0].budget_range.max)
-                  }
-                  contactType={ContactType.COMPANY}
-                  assignedToName={account.assigned_to?.name}
-                />
-              </Grid>
-            ))}
-          {salesAccounts
-            .filter((account) => {
+            }).length == 0 &&
+            salesAccounts.filter((account) => {
               if (account.status_id == AccountStatus.WARM) return account;
-            })
-            .map((account: any) => (
-              <Grid key={account.id} item>
-                <ContactCard
-                  name={account.name}
-                  email={account.email}
-                  phone={account.phone}
-                  jobTitle={account.job_title.title}
-                  areaType={account.interests[0].property_type.type}
-                  assignedTo={account.assigned_to_id}
-                  budgetRange={
-                    formatNumber(account.interests[0].budget_range.min) +
-                    "-" +
-                    formatNumber(account.interests[0].budget_range.max)
-                  }
-                  contactType={ContactType.SALES}
-                  assignedToName={account.assigned_to?.name}
-                />
-              </Grid>
-            ))}
+            }).length == 0 && (
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <DoNotDisturbIcon color="action" sx={{ mr: 1 }} />
+                <Typography color="text.secondary" variant="h5">
+                  Empty
+                </Typography>
+              </Box>
+            )}
+
+          {companyAccounts &&
+            companyAccounts
+              .filter((account) => {
+                if (account.status_id == AccountStatus.WARM) return account;
+              })
+              .map((account: any) => (
+                <Grid key={account.id} item>
+                  <ContactCard
+                    name={account.lead.name}
+                    email={account.lead.email}
+                    phone={account.phone}
+                    jobTitle={account.lead.job_title.title}
+                    areaType={account.lead.interests[0].property_type.type}
+                    assignedTo={account.assigned_to_id}
+                    budgetRange={
+                      formatNumber(account.lead.interests[0].budget_range.min) +
+                      "-" +
+                      formatNumber(account.lead.interests[0].budget_range.max)
+                    }
+                    contactType={ContactType.COMPANY}
+                    assignedToName={account.assigned_to?.name}
+                    leadStatus={account.lead.status.id}
+                    accountStatus={account.status_id}
+                    employees={employees}
+                  />
+                </Grid>
+              ))}
+          {salesAccounts &&
+            salesAccounts
+              .filter((account) => {
+                if (account.status_id == AccountStatus.WARM) return account;
+              })
+              .map((account: any) => (
+                <Grid key={account.id} item>
+                  <ContactCard
+                    name={account.name}
+                    email={account.email}
+                    phone={account.phone}
+                    jobTitle={account.job_title.title}
+                    areaType={account.interests[0].property_type.type}
+                    assignedTo={account.assigned_to_id}
+                    budgetRange={
+                      formatNumber(account.interests[0].budget_range.min) +
+                      "-" +
+                      formatNumber(account.interests[0].budget_range.max)
+                    }
+                    contactType={ContactType.SALES}
+                    accountStatus={account.status_id}
+                    assignedToName={account.assigned_to?.name}
+                  />
+                </Grid>
+              ))}
         </Grid>
-        <Grid item xs={12} sm={6} md={4} lg={3}>
-          <h3
-            style={{
-              color: "skyblue",
-            }}
-          >
-            Cold
-          </h3>
-          <Divider sx={{ mb: 2 }} />
-          {companyAccounts
-            .filter((account) => {
+
+        <Grid item container columnSpacing={2} xs={12}>
+          <Grid item xs={12}>
+            <h3
+              style={{
+                color: "skyblue",
+              }}
+            >
+              Cold
+            </h3>
+            <Divider sx={{ mb: 2 }} />
+          </Grid>
+          {companyAccounts &&
+            salesAccounts &&
+            companyAccounts.filter((account) => {
               if (account.status_id == AccountStatus.COLD) return account;
-            })
-            .map((account: any) => (
-              <Grid key={account.id} item>
-                <ContactCard
-                  name={account.lead.name}
-                  email={account.lead.email}
-                  phone={account.phone}
-                  jobTitle={account.lead.job_title.title}
-                  areaType={account.lead.interests[0].property_type.type}
-                  assignedTo={account.assigned_to_id}
-                  budgetRange={
-                    formatNumber(account.lead.interests[0].budget_range.min) +
-                    "-" +
-                    formatNumber(account.lead.interests[0].budget_range.max)
-                  }
-                  contactType={ContactType.COMPANY}
-                  assignedToName={account.assigned_to?.name}
-                />
-              </Grid>
-            ))}
-          {salesAccounts
-            .filter((account) => {
+            }).length == 0 &&
+            salesAccounts.filter((account) => {
               if (account.status_id == AccountStatus.COLD) return account;
-            })
-            .map((account: any) => (
-              <Grid key={account.id} item>
-                <ContactCard
-                  name={account.name}
-                  email={account.email}
-                  phone={account.phone}
-                  jobTitle={account.job_title.title}
-                  areaType={account.interests[0].property_type.type}
-                  assignedTo={account.assigned_to_id}
-                  budgetRange={
-                    formatNumber(account.interests[0].budget_range.min) +
-                    "-" +
-                    formatNumber(account.interests[0].budget_range.max)
-                  }
-                  contactType={ContactType.SALES}
-                  assignedToName={account.assigned_to?.name}
-                />
-              </Grid>
-            ))}
+            }).length == 0 && (
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <DoNotDisturbIcon color="action" sx={{ mr: 1 }} />
+                <Typography color="text.secondary" variant="h5">
+                  Empty
+                </Typography>
+              </Box>
+            )}
+          {companyAccounts &&
+            companyAccounts
+              .filter((account) => {
+                if (account.status_id == AccountStatus.COLD) return account;
+              })
+              .map((account: any) => (
+                <Grid key={account.id} item>
+                  <ContactCard
+                    name={account.lead.name}
+                    email={account.lead.email}
+                    phone={account.phone}
+                    jobTitle={account.lead.job_title.title}
+                    areaType={account.lead.interests[0].property_type.type}
+                    assignedTo={account.assigned_to_id}
+                    budgetRange={
+                      formatNumber(account.lead.interests[0].budget_range.min) +
+                      "-" +
+                      formatNumber(account.lead.interests[0].budget_range.max)
+                    }
+                    contactType={ContactType.COMPANY}
+                    assignedToName={account.assigned_to?.name}
+                    leadStatus={account.lead.status.id}
+                    accountStatus={account.status_id}
+                    employees={employees}
+                  />
+                </Grid>
+              ))}
+          {salesAccounts &&
+            salesAccounts
+              .filter((account) => {
+                if (account.status_id == AccountStatus.COLD) return account;
+              })
+              .map((account: any) => (
+                <Grid key={account.id} item>
+                  <ContactCard
+                    name={account.name}
+                    email={account.email}
+                    phone={account.phone}
+                    jobTitle={account.job_title.title}
+                    areaType={account.interests[0].property_type.type}
+                    assignedTo={account.assigned_to_id}
+                    budgetRange={
+                      formatNumber(account.interests[0].budget_range.min) +
+                      "-" +
+                      formatNumber(account.interests[0].budget_range.max)
+                    }
+                    contactType={ContactType.SALES}
+                    accountStatus={account.status_id}
+                    assignedToName={account.assigned_to?.name}
+                  />
+                </Grid>
+              ))}
         </Grid>
       </Grid>
     </Box>
