@@ -1,6 +1,7 @@
 "use client";
 import ActionsCard from "@/components/ActionsCard";
 import { components } from "@/interfaces/db_interfaces";
+import { ActionType } from "@/interfaces/enums";
 import { HttpMethod, getData } from "@/utils/api";
 import { isRefreshTokenExpired } from "@/utils/auth";
 import { formatReadableDate } from "@/utils/format";

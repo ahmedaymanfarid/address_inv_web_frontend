@@ -440,7 +440,16 @@ const ContactCard: React.FC<ContactCardProps> = ({
           >
             WhatsApp
           </Button>
-          <Button sx={{ flex: "1 1 0" }}>View</Button>
+          <Link
+            href={{
+              pathname: "/leads/view",
+              query: {
+                phone: phone,
+              },
+            }}
+          >
+            <Button sx={{ flex: "1 1 0" }}>View</Button>
+          </Link>
         </ButtonGroup>
       </CardActions>
     </Card>
