@@ -4,7 +4,7 @@ import { components } from "@/interfaces/db_interfaces";
 import { AccountStatus, ContactType } from "@/interfaces/enums";
 import { HttpMethod, getData } from "@/utils/api";
 import { isRefreshTokenExpired } from "@/utils/auth";
-import { formatNumber } from "@/utils/format";
+import { formatBudgetRange, formatNumber } from "@/utils/format";
 import AddIcon from "@mui/icons-material/Add";
 import DoNotDisturbIcon from "@mui/icons-material/DoNotDisturb";
 import Box from "@mui/material/Box";
@@ -164,7 +164,7 @@ export default function TasksPage() {
           }
 
           if (propertyTypeID) {
-            params["property_type_id"] = propertyTypeID;
+            params["property_type?_id"] = propertyTypeID;
           }
 
           if (deliveryRangeID) {
@@ -271,7 +271,11 @@ export default function TasksPage() {
           </FormControl>
         </Grid>
         <Grid item>
-          <Link href="/accounts/add">
+          <Link
+            href={{
+              pathname: "/leads/add",
+            }}
+          >
             <Fab color="primary" aria-label="add">
               <AddIcon />
             </Fab>
@@ -301,10 +305,10 @@ export default function TasksPage() {
           {companyAccounts &&
             salesAccounts &&
             companyAccounts.filter((account) => {
-              if (account.status_id == undefined) return account;
+              if (account.status_id == AccountStatus.NEW) return account;
             }).length == 0 &&
             salesAccounts.filter((account) => {
-              if (account.status_id == undefined) return account;
+              if (account.status_id == AccountStatus.NEW) return account;
             }).length == 0 && (
               <Box sx={{ display: "flex", alignItems: "center" }}>
                 <DoNotDisturbIcon color="action" sx={{ mr: 1 }} />
@@ -316,49 +320,50 @@ export default function TasksPage() {
           {companyAccounts &&
             companyAccounts
               .filter((account) => {
-                if (account.status_id == undefined) return account;
+                if (account.status_id == AccountStatus.NEW) return account;
               })
-              .map((account: any) => (
-                <Grid key={account.id} item>
+              .map((account) => (
+                <Grid key={`${account.assigned_to_id}-${account.phone}`} item>
                   <ContactCard
                     name={account.lead.name}
-                    email={account.lead.email}
+                    // email={account.lead.email}
                     phone={account.phone}
-                    jobTitle={account.lead.job_title.title}
-                    areaType={account.lead.interests[0].property_type.type}
+                    jobTitle={account.lead.job_title?.title}
+                    area={account.lead.interests.at(0)?.area?.area}
+                    project={account.lead.interests.at(0)?.project?.name}
+                    // area=Type={account.lead.interests.at(0)?.property_type?.type}
                     assignedTo={account.assigned_to_id}
-                    budgetRange={
-                      formatNumber(account.lead.interests[0].budget_range.min) +
-                      "-" +
-                      formatNumber(account.lead.interests[0].budget_range.max)
-                    }
+                    budgetRange={formatBudgetRange(
+                      account.lead.interests.at(0)?.budget_range
+                    )}
                     contactType={ContactType.COMPANY}
                     assignedToName={account.assigned_to?.name}
                     leadStatus={account.lead.status.id}
                     accountStatus={account.status_id}
                     employees={employees}
+                    leadType={account.lead.type_id}
                   />
                 </Grid>
               ))}
           {salesAccounts &&
             salesAccounts
               .filter((account) => {
-                if (account.status_id == undefined) return account;
+                if (account.status_id == AccountStatus.NEW) return account;
               })
-              .map((account: any) => (
-                <Grid key={account.id} item>
+              .map((account) => (
+                <Grid key={`${account.assigned_to_id}-${account.phone}`} item>
                   <ContactCard
                     name={account.name}
-                    email={account.email}
+                    // email={account.email}
                     phone={account.phone}
-                    jobTitle={account.job_title.title}
+                    jobTitle={account.job_title?.title}
                     assignedTo={account.assigned_to_id}
-                    areaType={account.interests[0].property_type.type}
-                    budgetRange={
-                      formatNumber(account.interests[0].budget_range.min) +
-                      "-" +
-                      formatNumber(account.interests[0].budget_range.max)
-                    }
+                    area={account.interests.at(0)?.area?.area}
+                    project={account.interests.at(0)?.project?.name}
+                    // areaType={account.interests.at(0)?.property_type?.type}
+                    budgetRange={formatBudgetRange(
+                      account.interests.at(0)?.budget_range
+                    )}
                     contactType={ContactType.SALES}
                     accountStatus={account.status_id}
                     assignedToName={account.assigned_to?.name}
@@ -399,25 +404,26 @@ export default function TasksPage() {
               .filter((account) => {
                 if (account.status_id == AccountStatus.HOT) return account;
               })
-              .map((account: any) => (
-                <Grid key={account.id} item>
+              .map((account) => (
+                <Grid key={`${account.assigned_to_id}-${account.phone}`} item>
                   <ContactCard
                     name={account.lead.name}
-                    email={account.lead.email}
+                    // email={account.lead.email}
                     phone={account.phone}
-                    jobTitle={account.lead.job_title.title}
-                    areaType={account.lead.interests[0].property_type.type}
+                    jobTitle={account.lead.job_title?.title}
+                    area={account.lead.interests.at(0)?.area?.area}
+                    project={account.lead.interests.at(0)?.project?.name}
+                    // areaType={account.lead.interests.at(0)?.property_type?.type}
                     assignedTo={account.assigned_to_id}
-                    budgetRange={
-                      formatNumber(account.lead.interests[0].budget_range.min) +
-                      "-" +
-                      formatNumber(account.lead.interests[0].budget_range.max)
-                    }
+                    budgetRange={formatBudgetRange(
+                      account.lead.interests.at(0)?.budget_range
+                    )}
                     contactType={ContactType.COMPANY}
                     assignedToName={account.assigned_to?.name}
                     leadStatus={account.lead.status.id}
                     accountStatus={account.status_id}
                     employees={employees}
+                    leadType={account.lead.type_id}
                   />
                 </Grid>
               ))}
@@ -426,20 +432,20 @@ export default function TasksPage() {
               .filter((account) => {
                 if (account.status_id == AccountStatus.HOT) return account;
               })
-              .map((account: any) => (
-                <Grid key={account.id} item>
+              .map((account) => (
+                <Grid key={`${account.assigned_to_id}-${account.phone}`} item>
                   <ContactCard
                     name={account.name}
-                    email={account.email}
+                    // email={account.email}
                     phone={account.phone}
-                    jobTitle={account.job_title.title}
-                    areaType={account.interests[0].property_type.type}
+                    jobTitle={account.job_title?.title}
+                    // areaType={account.interests.at(0)?.property_type?.type}
+                    area={account.interests.at(0)?.area?.area}
+                    project={account.interests.at(0)?.project?.name}
                     assignedTo={account.assigned_to_id}
-                    budgetRange={
-                      formatNumber(account.interests[0].budget_range.min) +
-                      "-" +
-                      formatNumber(account.interests[0].budget_range.max)
-                    }
+                    budgetRange={formatBudgetRange(
+                      account.interests.at(0)?.budget_range
+                    )}
                     contactType={ContactType.SALES}
                     accountStatus={account.status_id}
                     assignedToName={account.assigned_to?.name}
@@ -480,25 +486,26 @@ export default function TasksPage() {
               .filter((account) => {
                 if (account.status_id == AccountStatus.WARM) return account;
               })
-              .map((account: any) => (
-                <Grid key={account.id} item>
+              .map((account) => (
+                <Grid key={`${account.assigned_to_id}-${account.phone}`} item>
                   <ContactCard
                     name={account.lead.name}
-                    email={account.lead.email}
+                    // email={account.lead.email}
                     phone={account.phone}
-                    jobTitle={account.lead.job_title.title}
-                    areaType={account.lead.interests[0].property_type.type}
+                    jobTitle={account.lead.job_title?.title}
+                    area={account.lead.interests.at(0)?.area?.area}
+                    project={account.lead.interests.at(0)?.project?.name}
+                    // areaType={account.lead.interests.at(0)?.property_type?.type}
                     assignedTo={account.assigned_to_id}
-                    budgetRange={
-                      formatNumber(account.lead.interests[0].budget_range.min) +
-                      "-" +
-                      formatNumber(account.lead.interests[0].budget_range.max)
-                    }
+                    budgetRange={formatBudgetRange(
+                      account.lead.interests.at(0)?.budget_range
+                    )}
                     contactType={ContactType.COMPANY}
                     assignedToName={account.assigned_to?.name}
                     leadStatus={account.lead.status.id}
                     accountStatus={account.status_id}
                     employees={employees}
+                    leadType={account.lead.type_id}
                   />
                 </Grid>
               ))}
@@ -507,20 +514,20 @@ export default function TasksPage() {
               .filter((account) => {
                 if (account.status_id == AccountStatus.WARM) return account;
               })
-              .map((account: any) => (
-                <Grid key={account.id} item>
+              .map((account) => (
+                <Grid key={`${account.assigned_to_id}-${account.phone}`} item>
                   <ContactCard
                     name={account.name}
-                    email={account.email}
+                    // email={account.email}
                     phone={account.phone}
-                    jobTitle={account.job_title.title}
-                    areaType={account.interests[0].property_type.type}
+                    jobTitle={account.job_title?.title}
+                    area={account.interests.at(0)?.area?.area}
+                    project={account.interests.at(0)?.project?.name}
+                    // areaType={account.interests.at(0)?.property_type?.type}
                     assignedTo={account.assigned_to_id}
-                    budgetRange={
-                      formatNumber(account.interests[0].budget_range.min) +
-                      "-" +
-                      formatNumber(account.interests[0].budget_range.max)
-                    }
+                    budgetRange={formatBudgetRange(
+                      account.interests.at(0)?.budget_range
+                    )}
                     contactType={ContactType.SALES}
                     accountStatus={account.status_id}
                     assignedToName={account.assigned_to?.name}
@@ -560,25 +567,26 @@ export default function TasksPage() {
               .filter((account) => {
                 if (account.status_id == AccountStatus.COLD) return account;
               })
-              .map((account: any) => (
-                <Grid key={account.id} item>
+              .map((account) => (
+                <Grid key={`${account.assigned_to_id}-${account.phone}`} item>
                   <ContactCard
                     name={account.lead.name}
-                    email={account.lead.email}
+                    // email={account.lead.email}
                     phone={account.phone}
-                    jobTitle={account.lead.job_title.title}
-                    areaType={account.lead.interests[0].property_type.type}
+                    jobTitle={account.lead.job_title?.title}
+                    area={account.lead.interests.at(0)?.area?.area}
+                    project={account.lead.interests.at(0)?.project?.name}
+                    // areaType={account.lead.interests.at(0)?.property_type?.type}
                     assignedTo={account.assigned_to_id}
-                    budgetRange={
-                      formatNumber(account.lead.interests[0].budget_range.min) +
-                      "-" +
-                      formatNumber(account.lead.interests[0].budget_range.max)
-                    }
+                    budgetRange={formatBudgetRange(
+                      account.lead.interests.at(0)?.budget_range
+                    )}
                     contactType={ContactType.COMPANY}
                     assignedToName={account.assigned_to?.name}
                     leadStatus={account.lead.status.id}
                     accountStatus={account.status_id}
                     employees={employees}
+                    leadType={account.lead.type_id}
                   />
                 </Grid>
               ))}
@@ -587,20 +595,20 @@ export default function TasksPage() {
               .filter((account) => {
                 if (account.status_id == AccountStatus.COLD) return account;
               })
-              .map((account: any) => (
-                <Grid key={account.id} item>
+              .map((account) => (
+                <Grid key={`${account.assigned_to_id}-${account.phone}`} item>
                   <ContactCard
                     name={account.name}
-                    email={account.email}
+                    // email={account.email}
                     phone={account.phone}
-                    jobTitle={account.job_title.title}
-                    areaType={account.interests[0].property_type.type}
+                    jobTitle={account.job_title?.title}
+                    area={account.interests.at(0)?.area?.area}
+                    project={account.interests.at(0)?.project?.name}
+                    // areaType={account.interests.at(0)?.property_type?.type}
                     assignedTo={account.assigned_to_id}
-                    budgetRange={
-                      formatNumber(account.interests[0].budget_range.min) +
-                      "-" +
-                      formatNumber(account.interests[0].budget_range.max)
-                    }
+                    budgetRange={formatBudgetRange(
+                      account.interests.at(0)?.budget_range
+                    )}
                     contactType={ContactType.SALES}
                     accountStatus={account.status_id}
                     assignedToName={account.assigned_to?.name}

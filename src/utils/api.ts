@@ -65,8 +65,14 @@ export const getData = async (
     if (!response.ok) {
       if (errorHandler) {
         errorHandler(response.status, response.statusText);
+      } else if (response.status === 404) {
+        throw new Error("Employee not found");
+      } else if (response.status === 400) {
+        throw new Error("Employee already registered");
+      } else if (response.status === 422) {
+        throw new Error("Check your inputs");
       } else {
-        throw new Error(`Request failed with status ${response.status}`);
+        throw new Error("Something went wrong");
       }
     }
 

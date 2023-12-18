@@ -33,8 +33,9 @@ export const formatNumber = (num?: number): string | void => {
 };
 
 export const formatBudgetRange = (
-  budgetRange: components["schemas"]["RangeInt"]
-): string => {
+  budgetRange: components["schemas"]["RangeInt"] | undefined
+): string | undefined => {
+  if (!budgetRange) return undefined;
   const { min, max } = budgetRange;
 
   if (!max) {

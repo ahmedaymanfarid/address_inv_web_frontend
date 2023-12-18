@@ -20,6 +20,10 @@ export interface paths {
     /** Create a new employee. */
     post: operations["create_employee_employees__post"];
   };
+  "/user/me": {
+    /** Retrieve information about the current employee. */
+    get: operations["get_employee_me_user_me_get"];
+  };
   "/employees/{employee_id}": {
     /**
      * Retrieve information about a specific employee by `id`.
@@ -66,6 +70,9 @@ export interface paths {
     post: operations["create_sales_account_accounts_sales_post"];
     delete: operations["delete_sales_account_accounts_sales_delete"];
   };
+  "/accounts/sales/status": {
+    put: operations["update_sales_account_status_accounts_sales_status_put"];
+  };
   "/leads/rotate": {
     post: operations["rotate_lead_leads_rotate_post"];
   };
@@ -75,10 +82,19 @@ export interface paths {
     post: operations["create_lead_leads__post"];
     delete: operations["delete_lead_leads__delete"];
   };
+  "/leads/{phone}": {
+    get: operations["get_lead_leads__phone__get"];
+  };
+  "/leads/{phone}/actions": {
+    get: operations["get_lead_actions_leads__phone__actions_get"];
+  };
   "/accounts/company": {
     get: operations["get_company_accounts_accounts_company_get"];
     put: operations["update_company_account_accounts_company_put"];
     delete: operations["delete_company_account_accounts_company_delete"];
+  };
+  "/accounts/company/status": {
+    put: operations["update_company_account_status_accounts_company_status_put"];
   };
   "/teams/": {
     get: operations["get_teams_teams__get"];
@@ -117,10 +133,12 @@ export interface paths {
     delete: operations["delete_sales_notes_accounts_sales_notes_delete"];
   };
   "/leads/notes": {
-    get: operations["get_lead_notes_leads_notes_get"];
     put: operations["update_lead_notes_leads_notes_put"];
     post: operations["create_lead_notes_leads_notes_post"];
     delete: operations["delete_lead_notes_leads_notes_delete"];
+  };
+  "/leads/notes/": {
+    get: operations["get_lead_notes_leads_notes__get"];
   };
   "/budget_ranges/": {
     get: operations["get_budget_ranges_budget_ranges__get"];
@@ -133,6 +151,18 @@ export interface paths {
   };
   "/delivery_ranges/": {
     get: operations["get_delivery_ranges_delivery_ranges__get"];
+  };
+  "/job_titles/": {
+    get: operations["get_job_titles_job_titles__get"];
+  };
+  "/call_statuses/": {
+    get: operations["get_call_statuses_call_statuses__get"];
+  };
+  "/meeting_statuses/": {
+    get: operations["get_meeting_statuses_meeting_statuses__get"];
+  };
+  "/projects/": {
+    get: operations["get_peojects_projects__get"];
   };
   "/streets/": {
     get: operations["search_streets_streets__get"];
@@ -185,6 +215,13 @@ export interface components {
        */
       meetings?: (Partial<components["schemas"]["SalesAction"]> &
         Partial<components["schemas"]["CompanyAction"]>)[];
+    };
+    /** AdditionalPhone */
+    AdditionalPhone: {
+      /** Phone Id */
+      phone_id: number;
+      /** Extra Phone */
+      extra_phone: string;
     };
     /** Area */
     Area: {
@@ -284,6 +321,8 @@ export interface components {
       company_account_phone: string;
       /** Id */
       id: number;
+      company_account: Partial<components["schemas"]["CompanyAccount"]> &
+        Partial<unknown>;
       assigned_to: components["schemas"]["Employee"];
       /**
        * Date Added
@@ -307,7 +346,7 @@ export interface components {
       company_account_phone: string;
       /**
        * Date
-       * @default 2023-11-30T15:08:42.391281
+       * @default 2023-12-17T11:14:31.735829
        */
       date?: Partial<string> & Partial<unknown>;
     };
@@ -366,30 +405,6 @@ export interface components {
        */
       date_added: string;
     };
-    /** EducationalDegree */
-    EducationalDegree: {
-      /** Id */
-      id: number;
-      /** Degree */
-      degree: string;
-      /**
-       * Date Added
-       * Format: date-time
-       */
-      date_added: string;
-    };
-    /** EducationalMajor */
-    EducationalMajor: {
-      /** Id */
-      id: number;
-      /** Major */
-      major: string;
-      /**
-       * Date Added
-       * Format: date-time
-       */
-      date_added: string;
-    };
     /** Employee */
     Employee: {
       /** Id */
@@ -400,7 +415,8 @@ export interface components {
       team: components["schemas"]["Team"];
       position: components["schemas"]["Position"];
       business_email: components["schemas"]["EmployeeEmail"];
-      business_phone: components["schemas"]["EmployeePhone"];
+      business_phone?: Partial<components["schemas"]["EmployeePhone"]> &
+        Partial<unknown>;
       personal_email?: Partial<components["schemas"]["EmployeeEmail"]> &
         Partial<unknown>;
       personal_phone?: Partial<components["schemas"]["EmployeePhone"]> &
@@ -409,7 +425,6 @@ export interface components {
         components["schemas"]["EmployeeTerminationInfo"]
       > &
         Partial<unknown>;
-      educational_qualification: components["schemas"]["EmployeeEducationalQualification"];
       /**
        * Date Added
        * Format: date-time
@@ -458,24 +473,6 @@ export interface components {
       /** Graduation Year */
       graduation_year: number;
     };
-    /** EmployeeEducationalQualification */
-    EmployeeEducationalQualification: {
-      /** Employee Id */
-      employee_id: number;
-      /** Certificate Id */
-      certificate_id: number;
-      certificate: components["schemas"]["EducationalDegree"];
-      /** Major Id */
-      major_id: number;
-      major: components["schemas"]["EducationalMajor"];
-      /** Graduation Year */
-      graduation_year: number;
-      /**
-       * Date Added
-       * Format: date-time
-       */
-      date_added: string;
-    };
     /** EmployeeEmail */
     EmployeeEmail: {
       /** Employee Id */
@@ -502,8 +499,11 @@ export interface components {
     };
     /** EmployeeRegister */
     EmployeeRegister: {
-      /** Id */
-      id: number;
+      /**
+       * Business Email
+       * Format: email
+       */
+      business_email: string;
       /** Password */
       password: string;
       /** Personal Email */
@@ -620,7 +620,7 @@ export interface components {
      * Gender
      * @enum {string}
      */
-    Gender: "male" | "female";
+    Gender: "Male" | "Female";
     /** HTTPValidationError */
     HTTPValidationError: {
       /** Detail */
@@ -644,6 +644,8 @@ export interface components {
       name: string;
       /** Phone */
       phone: string;
+      /** Type Id */
+      type_id: number;
       /** Assigned To Id */
       assigned_to_id?: Partial<number> & Partial<unknown>;
       /** Email */
@@ -665,6 +667,12 @@ export interface components {
        * Format: date-time
        */
       date_added: string;
+      type: components["schemas"]["LeadType"];
+      /**
+       * Additional Phones
+       * @default []
+       */
+      additional_phones?: components["schemas"]["AdditionalPhone"][];
     };
     /** LeadCreate */
     LeadCreate: {
@@ -672,6 +680,8 @@ export interface components {
       name: string;
       /** Phone */
       phone: string;
+      /** Type Id */
+      type_id: number;
       /** Assigned To Id */
       assigned_to_id?: Partial<number> & Partial<unknown>;
       /** Email */
@@ -681,19 +691,28 @@ export interface components {
       job_title_id?: Partial<number> & Partial<unknown>;
       /** Interests */
       interests: components["schemas"]["LeadInterestCreate"][];
+      /**
+       * Additional Phones
+       * @default []
+       */
+      additional_phones?: string[];
     };
     /** LeadInterest */
     LeadInterest: {
       /** Budget Range Id */
-      budget_range_id: number;
+      budget_range_id: Partial<number> & Partial<unknown>;
       /** Area Range Id */
-      area_range_id: number;
+      area_range_id: Partial<number> & Partial<unknown>;
       /** Delivery Range Id */
-      delivery_range_id: number;
+      delivery_range_id: Partial<number> & Partial<unknown>;
       /** Payment Method Id */
-      payment_method_id: number;
+      payment_method_id: Partial<number> & Partial<unknown>;
       /** Property Type Id */
-      property_type_id: number;
+      property_type_id: Partial<number> & Partial<unknown>;
+      /** Area Id */
+      area_id: Partial<number> & Partial<unknown>;
+      /** Project Id */
+      project_id: Partial<number> & Partial<unknown>;
       /** Lead Phone */
       lead_phone: string;
       /** Interest Id */
@@ -708,38 +727,30 @@ export interface components {
         Partial<unknown>;
       property_type?: Partial<components["schemas"]["PropertyType"]> &
         Partial<unknown>;
-      /**
-       * Areas
-       * @default []
-       */
-      areas?: Partial<components["schemas"]["LeadInterestArea"][]> &
-        Partial<unknown>;
+      area?: Partial<components["schemas"]["Area"]> & Partial<unknown>;
+      project?: Partial<components["schemas"]["Project"]> & Partial<unknown>;
       /**
        * Date Added
        * Format: date-time
        */
       date_added: string;
     };
-    /** LeadInterestArea */
-    LeadInterestArea: {
-      /** Area Id */
-      area_id: number;
-      area: components["schemas"]["Area"];
-    };
     /** LeadInterestCreate */
     LeadInterestCreate: {
       /** Budget Range Id */
-      budget_range_id: number;
+      budget_range_id: Partial<number> & Partial<unknown>;
       /** Area Range Id */
-      area_range_id: number;
+      area_range_id: Partial<number> & Partial<unknown>;
       /** Delivery Range Id */
-      delivery_range_id: number;
+      delivery_range_id: Partial<number> & Partial<unknown>;
       /** Payment Method Id */
-      payment_method_id: number;
+      payment_method_id: Partial<number> & Partial<unknown>;
       /** Property Type Id */
-      property_type_id: number;
-      /** Areas Ids */
-      areas_ids: number[];
+      property_type_id: Partial<number> & Partial<unknown>;
+      /** Area Id */
+      area_id: Partial<number> & Partial<unknown>;
+      /** Project Id */
+      project_id: Partial<number> & Partial<unknown>;
     };
     /** LeadNotes */
     LeadNotes: {
@@ -763,21 +774,17 @@ export interface components {
       /** Notes */
       notes: string;
     };
-    /** LeadNotesSearch */
-    LeadNotesSearch: {
-      /** Phone */
-      phone?: Partial<string> & Partial<unknown>;
-      /** Notes */
-      notes?: Partial<string> & Partial<unknown>;
-      /** Date Added */
-      date_added?: Partial<string> & Partial<unknown>;
-      /** Added By Id */
-      added_by_id?: Partial<number> & Partial<unknown>;
-    };
     /** LeadNotesUpdate */
     LeadNotesUpdate: {
       /** Notes */
       notes: string;
+    };
+    /** LeadType */
+    LeadType: {
+      /** Id */
+      id: number;
+      /** Type */
+      type: string;
     };
     /** LeadUpdate */
     LeadUpdate: {
@@ -793,6 +800,10 @@ export interface components {
       /** Interests */
       interests?: Partial<components["schemas"]["LeadInterestCreate"][]> &
         Partial<unknown>;
+      /** Type Id */
+      type_id: Partial<number> & Partial<unknown>;
+      /** Additional Phones */
+      additional_phones?: Partial<string[]> & Partial<unknown>;
     };
     /**
      * MeetingStatus
@@ -817,6 +828,13 @@ export interface components {
        * Format: date-time
        */
       date_added: string;
+    };
+    /** Project */
+    Project: {
+      /** Id */
+      id: number;
+      /** Name */
+      name: string;
     };
     /** PropertyType */
     PropertyType: {
@@ -894,19 +912,28 @@ export interface components {
       status_id: number;
       /** Interests */
       interests: components["schemas"]["SalesAccountInterestCreate"][];
+      /**
+       * Additional Phones
+       * @default []
+       */
+      additional_phones?: string[];
     };
     /** SalesAccountInterest */
     SalesAccountInterest: {
       /** Budget Range Id */
-      budget_range_id: number;
+      budget_range_id: Partial<number> & Partial<unknown>;
       /** Area Range Id */
-      area_range_id: number;
+      area_range_id: Partial<number> & Partial<unknown>;
       /** Delivery Range Id */
-      delivery_range_id: number;
+      delivery_range_id: Partial<number> & Partial<unknown>;
       /** Payment Method Id */
-      payment_method_id: number;
+      payment_method_id: Partial<number> & Partial<unknown>;
       /** Property Type Id */
-      property_type_id: number;
+      property_type_id: Partial<number> & Partial<unknown>;
+      /** Area Id */
+      area_id: Partial<number> & Partial<unknown>;
+      /** Project Id */
+      project_id: Partial<number> & Partial<unknown>;
       /** Interest Id */
       interest_id: number;
       budget_range?: Partial<components["schemas"]["RangeMoney"]> &
@@ -919,38 +946,30 @@ export interface components {
         Partial<unknown>;
       property_type?: Partial<components["schemas"]["PropertyType"]> &
         Partial<unknown>;
-      /**
-       * Areas
-       * @default []
-       */
-      areas?: Partial<components["schemas"]["SalesAccountInterestArea"][]> &
-        Partial<unknown>;
+      area: Partial<components["schemas"]["Area"]> & Partial<unknown>;
+      project: Partial<components["schemas"]["Project"]> & Partial<unknown>;
       /**
        * Date Added
        * Format: date-time
        */
       date_added: string;
     };
-    /** SalesAccountInterestArea */
-    SalesAccountInterestArea: {
-      /** Area Id */
-      area_id: number;
-      area: components["schemas"]["Area"];
-    };
     /** SalesAccountInterestCreate */
     SalesAccountInterestCreate: {
       /** Budget Range Id */
-      budget_range_id: number;
+      budget_range_id: Partial<number> & Partial<unknown>;
       /** Area Range Id */
-      area_range_id: number;
+      area_range_id: Partial<number> & Partial<unknown>;
       /** Delivery Range Id */
-      delivery_range_id: number;
+      delivery_range_id: Partial<number> & Partial<unknown>;
       /** Payment Method Id */
-      payment_method_id: number;
+      payment_method_id: Partial<number> & Partial<unknown>;
       /** Property Type Id */
-      property_type_id: number;
-      /** Areas Ids */
-      areas_ids: number[];
+      property_type_id: Partial<number> & Partial<unknown>;
+      /** Area Id */
+      area_id: Partial<number> & Partial<unknown>;
+      /** Project Id */
+      project_id: Partial<number> & Partial<unknown>;
     };
     /** SalesAccountSearch */
     SalesAccountSearch: {
@@ -973,6 +992,8 @@ export interface components {
       payment_method_id?: Partial<number> & Partial<unknown>;
       /** Area Id */
       area_id?: Partial<number> & Partial<unknown>;
+      /** Project Id */
+      project_id?: Partial<number> & Partial<unknown>;
     };
     /** SalesAccountUpdate */
     SalesAccountUpdate: {
@@ -985,6 +1006,11 @@ export interface components {
       job_title_id?: Partial<number> & Partial<unknown>;
       /** Status Id */
       status_id?: Partial<number> & Partial<unknown>;
+      /**
+       * Additional Phones
+       * @default []
+       */
+      additional_phones?: components["schemas"]["AdditionalPhone"][];
       /** Interests */
       interests?: Partial<
         components["schemas"]["SalesAccountInterestCreate"][]
@@ -1029,7 +1055,7 @@ export interface components {
         Partial<components["schemas"]["MeetingStatus"]>;
       /**
        * Date
-       * @default 2023-11-30T15:08:42.385769
+       * @default 2023-12-17T11:14:31.731737
        */
       date?: Partial<string> & Partial<unknown>;
     };
@@ -1241,6 +1267,17 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["EmployeeCreate"];
+      };
+    };
+  };
+  /** Retrieve information about the current employee. */
+  get_employee_me_user_me_get: {
+    responses: {
+      /** Successful Response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Employee"];
+        };
       };
     };
   };
@@ -1482,6 +1519,29 @@ export interface operations {
       };
     };
   };
+  update_sales_account_status_accounts_sales_status_put: {
+    parameters: {
+      query: {
+        assigned_to: number;
+        phone: string;
+        status_id: number;
+      };
+    };
+    responses: {
+      /** Successful Response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SalesAccount"];
+        };
+      };
+      /** Validation Error */
+      422: {
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   rotate_lead_leads_rotate_post: {
     parameters: {
       query: {
@@ -1609,6 +1669,48 @@ export interface operations {
       };
     };
   };
+  get_lead_leads__phone__get: {
+    parameters: {
+      path: {
+        phone: string;
+      };
+    };
+    responses: {
+      /** Successful Response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Lead"];
+        };
+      };
+      /** Validation Error */
+      422: {
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_lead_actions_leads__phone__actions_get: {
+    parameters: {
+      path: {
+        phone: string;
+      };
+    };
+    responses: {
+      /** Successful Response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Actions"];
+        };
+      };
+      /** Validation Error */
+      422: {
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
   get_company_accounts_accounts_company_get: {
     parameters: {
       query: {
@@ -1681,6 +1783,29 @@ export interface operations {
       200: {
         content: {
           "application/json": unknown;
+        };
+      };
+      /** Validation Error */
+      422: {
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_company_account_status_accounts_company_status_put: {
+    parameters: {
+      query: {
+        assigned_to: number;
+        phone: string;
+        status_id: number;
+      };
+    };
+    responses: {
+      /** Successful Response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CompanyAccount"];
         };
       };
       /** Validation Error */
@@ -2181,28 +2306,6 @@ export interface operations {
       };
     };
   };
-  get_lead_notes_leads_notes_get: {
-    responses: {
-      /** Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["LeadNotes"][];
-        };
-      };
-      /** Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": Partial<components["schemas"]["LeadNotesSearch"]> &
-          Partial<unknown>;
-      };
-    };
-  };
   update_lead_notes_leads_notes_put: {
     parameters: {
       query: {
@@ -2234,7 +2337,7 @@ export interface operations {
       /** Successful Response */
       200: {
         content: {
-          "application/json": components["schemas"]["LeadNotes"][];
+          "application/json": components["schemas"]["LeadNotes"];
         };
       };
       /** Validation Error */
@@ -2261,6 +2364,30 @@ export interface operations {
       200: {
         content: {
           "application/json": unknown;
+        };
+      };
+      /** Validation Error */
+      422: {
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_lead_notes_leads_notes__get: {
+    parameters: {
+      query: {
+        phone?: Partial<string> & Partial<unknown>;
+        notes?: Partial<string> & Partial<unknown>;
+        date_added?: Partial<string> & Partial<unknown>;
+        added_by_id?: Partial<number> & Partial<unknown>;
+      };
+    };
+    responses: {
+      /** Successful Response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["LeadNotes"][];
         };
       };
       /** Validation Error */
@@ -2307,6 +2434,46 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["RangeInt"][];
+        };
+      };
+    };
+  };
+  get_job_titles_job_titles__get: {
+    responses: {
+      /** Successful Response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["JobTitle"][];
+        };
+      };
+    };
+  };
+  get_call_statuses_call_statuses__get: {
+    responses: {
+      /** Successful Response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["status"][];
+        };
+      };
+    };
+  };
+  get_meeting_statuses_meeting_statuses__get: {
+    responses: {
+      /** Successful Response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["status"][];
+        };
+      };
+    };
+  };
+  get_peojects_projects__get: {
+    responses: {
+      /** Successful Response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Project"][];
         };
       };
     };

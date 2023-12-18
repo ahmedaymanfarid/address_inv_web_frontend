@@ -1,19 +1,31 @@
 "use client";
 import { components } from "@/interfaces/db_interfaces";
-import { AccountStatus, ContactType, LeadStatus } from "@/interfaces/enums";
+import {
+  AccountStatus,
+  ContactType,
+  LeadStatus,
+  LeadType,
+} from "@/interfaces/enums";
 import { AdminOwner, AdminOwnerTeamLeader } from "@/interfaces/scopes";
 import { HttpMethod, getData, getUser } from "@/utils/api";
+import { Delete } from "@mui/icons-material";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import BadgeIcon from "@mui/icons-material/Badge";
+import DeleteIcon from "@mui/icons-material/Delete";
+import DomainIcon from "@mui/icons-material/Domain";
 import EmailIcon from "@mui/icons-material/Email";
 import HouseIcon from "@mui/icons-material/House";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import PersonIcon from "@mui/icons-material/Person";
 import PhoneIcon from "@mui/icons-material/Phone";
+import PlaceIcon from "@mui/icons-material/Place";
 import {
   CardHeader,
   CircularProgress,
   Divider,
+  List,
+  ListItemIcon,
+  ListItemText,
   Menu,
   MenuItem,
 } from "@mui/material";
@@ -35,11 +47,14 @@ interface ContactCardProps {
   phone: string;
   email?: string;
   areaType?: string;
+  area?: string;
   jobTitle?: string;
   budgetRange?: string;
   contactType: ContactType;
   assignedTo?: number;
   assignedToName?: string;
+  project?: string;
+  leadType?: LeadType;
   employees?: components["schemas"]["Employee"][];
   leadStatus?: LeadStatus;
   accountStatus?: AccountStatus;
@@ -49,6 +64,8 @@ const ContactCard: React.FC<ContactCardProps> = ({
   name,
   email,
   phone,
+  area,
+  project,
   jobTitle,
   areaType,
   budgetRange,
@@ -56,6 +73,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
   assignedTo,
   assignedToName,
   employees,
+  leadType,
   leadStatus,
   accountStatus,
 }) => {
@@ -148,6 +166,29 @@ const ContactCard: React.FC<ContactCardProps> = ({
     window.location.reload();
   };
 
+  const handleDelete = async () => {
+    try {
+      if (contactType === ContactType.LEAD) {
+        await getData("/leads/", HttpMethod.DELETE, {
+          phone: phone,
+        });
+      } else if (contactType === ContactType.COMPANY) {
+        await getData("/accounts/company", HttpMethod.DELETE, {
+          phone: phone,
+          assigned_to: assignedTo,
+        });
+      } else if (contactType === ContactType.SALES) {
+        await getData("/accounts/sales", HttpMethod.DELETE, {
+          phone: phone,
+          assigned_to: assignedTo,
+        });
+      }
+    } finally {
+      handleMenuClose();
+      window.location.reload();
+    }
+  };
+
   const calculateMiddlePosition = () => {
     const middleX = window.innerWidth / 2;
     const middleY = window.innerHeight / 2;
@@ -235,12 +276,22 @@ const ContactCard: React.FC<ContactCardProps> = ({
             leadStatus !== LeadStatus.NOT_ASSIGNED && (
               <MenuItem onClick={handleUnassign}>Unassign</MenuItem>
             )}
+          <MenuItem onClick={handleDelete}>
+            <ListItemIcon>
+              <DeleteIcon color="error" fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Delete</ListItemText>
+          </MenuItem>
         </Menu>
         {/* Chips (can wrap below the name and job title) */}
         {contactType === ContactType.COMPANY ? (
-          <Chip label="Company" color="primary" size="small" />
+          leadType === LeadType.CAMPAIGN ? (
+            <Chip label="Campaign" color="primary" size="small" />
+          ) : (
+            <Chip label="Cold Call" color="secondary" size="small" />
+          )
         ) : contactType === ContactType.SALES ? (
-          <Chip label="Sales" color="success" size="small" />
+          <Chip label="Personal" color="success" size="small" />
         ) : (
           contactType === ContactType.LEAD && (
             <Chip
@@ -288,6 +339,18 @@ const ContactCard: React.FC<ContactCardProps> = ({
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <HouseIcon color="action" sx={{ mr: 1 }} />
               <Typography variant="body2">{areaType}</Typography>
+            </Box>
+          )}
+          {project && (
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <DomainIcon color="action" sx={{ mr: 1 }} />
+              <Typography variant="body2">{project}</Typography>
+            </Box>
+          )}
+          {area && (
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <PlaceIcon color="action" sx={{ mr: 1 }} />
+              <Typography variant="body2">{area}</Typography>
             </Box>
           )}
           {budgetRange && (
@@ -440,16 +503,31 @@ const ContactCard: React.FC<ContactCardProps> = ({
           >
             WhatsApp
           </Button>
-          <Link
-            href={{
-              pathname: "/leads/view",
-              query: {
-                phone: phone,
-              },
-            }}
-          >
-            <Button sx={{ flex: "1 1 0" }}>View</Button>
-          </Link>
+          {contactType === ContactType.LEAD ? (
+            <Link
+              href={{
+                pathname: "/leads/view",
+                query: {
+                  phone: phone,
+                },
+              }}
+            >
+              <Button sx={{ flex: "1 1 0" }}>View</Button>
+            </Link>
+          ) : (
+            <Link
+              href={{
+                pathname: "/accounts/view",
+                query: {
+                  phone: phone,
+                  assignedTo: assignedTo,
+                  type: contactType,
+                },
+              }}
+            >
+              <Button sx={{ flex: "1 1 0" }}>View</Button>
+            </Link>
+          )}
         </ButtonGroup>
       </CardActions>
     </Card>

@@ -1,11 +1,12 @@
 "use client";
 import ContactCard from "@/components/ContactsCard";
 import { components } from "@/interfaces/db_interfaces";
-import { ContactType } from "@/interfaces/enums";
+import { ContactType, CreateType } from "@/interfaces/enums";
 import { AdminOwner } from "@/interfaces/scopes";
 import { HttpMethod, getData, getUser } from "@/utils/api";
 import { isRefreshTokenExpired } from "@/utils/auth";
 import { formatBudgetRange, formatNumber } from "@/utils/format";
+import { Create } from "@mui/icons-material";
 import AddIcon from "@mui/icons-material/Add";
 import DoNotDisturbIcon from "@mui/icons-material/DoNotDisturb";
 import {
@@ -40,18 +41,26 @@ export default function HomePage() {
   >([]);
   const [budget, setBudget] = useState("");
   const [budgetRangeID, setBudgetRangeID] = useState<number>();
+  const [locations, setLocations] = useState<components["schemas"]["Area"][]>(
+    []
+  );
+  const [locationID, setLocationID] = useState<number>();
+  const [projects, setProjects] = useState<components["schemas"]["Project"][]>(
+    []
+  );
+  const [projectID, setProjectID] = useState<number>();
 
-  const [propertyTypes, setPropertyTypes] = useState<
-    components["schemas"]["PropertyType"][]
-  >([]);
-  const [propertyType, setPropertyType] = useState<string>("");
-  const [propertyTypeID, setPropertyTypeID] = useState<number>(0);
+  // const [propertyTypes, setPropertyTypes] = useState<
+  //   components["schemas"]["PropertyType"][]
+  // >([]);
+  // const [propertyType, setPropertyType] = useState<string>("");
+  // const [propertyTypeID, setPropertyTypeID] = useState<number>(0);
 
-  const [deliveryRanges, setDeliveryRanges] = useState<
-    components["schemas"]["RangeInt"][]
-  >([]);
-  const [deliveryRange, setDeliveryRange] = useState<string>("");
-  const [deliveryRangeID, setDeliveryRangeID] = useState<number>(0);
+  // const [deliveryRanges, setDeliveryRanges] = useState<
+  //   components["schemas"]["RangeInt"][]
+  // >([]);
+  // const [deliveryRange, setDeliveryRange] = useState<string>("");
+  // const [deliveryRangeID, setDeliveryRangeID] = useState<number>(0);
 
   const [areas, setAreas] = useState<components["schemas"]["Area"][]>([]);
 
@@ -66,15 +75,23 @@ export default function HomePage() {
     setBudget(event.target.value);
   };
 
-  const handlePropertyTypeChange = (event: any) => {
-    setPropertyTypeID(event.target.value);
-    setPropertyType(event.target.value);
+  const handleLocationChange = (event: any) => {
+    setLocationID(event.target.value);
   };
 
-  const handleDeliveryRangeChange = (event: any) => {
-    setDeliveryRangeID(event.target.value);
-    setDeliveryRange(event.target.value);
+  const handleProjectChange = (event: any) => {
+    setProjectID(event.target.value);
   };
+
+  // const handlePropertyTypeChange = (event: any) => {
+  //   setPropertyTypeID(event.target.value);
+  //   setPropertyType(event.target.value);
+  // };
+
+  // const handleDeliveryRangeChange = (event: any) => {
+  //   setDeliveryRangeID(event.target.value);
+  //   setDeliveryRange(event.target.value);
+  // };
 
   const [filtersLoading, setFiltersLoading] = useState<boolean>(false);
   const [leadLoading, setLeadLoading] = useState<boolean>(false);
@@ -97,16 +114,16 @@ export default function HomePage() {
             undefined,
             signal
           );
-          const propertyData = await getData(
-            "/property_types/",
+          const locationsData = await getData(
+            "/areas/",
             HttpMethod.GET,
             undefined,
             undefined,
             undefined,
             signal
           );
-          const deliveryData = await getData(
-            "/delivery_ranges/",
+          const projectsData = await getData(
+            "/projects/",
             HttpMethod.GET,
             undefined,
             undefined,
@@ -115,8 +132,8 @@ export default function HomePage() {
           );
           // Handle the result
           SetBudgetRanges(budgetData);
-          setPropertyTypes(propertyData);
-          setDeliveryRanges(deliveryData);
+          setLocations(locationsData);
+          setProjects(projectsData);
           const employeeData = await getData(
             "/employees/",
             HttpMethod.GET,
@@ -161,14 +178,14 @@ export default function HomePage() {
             params["budget_range_id"] = budgetRangeID;
           }
 
-          if (propertyTypeID) {
-            params["property_type_id"] = propertyTypeID;
+          if (locationID) {
+            params["area_id"] = locationID;
           }
 
-          if (deliveryRangeID) {
-            params["delivery_range_id"] = deliveryRangeID;
+          if (projectID !== undefined && projectID !== -1) {
+            params["project_id"] = projectID;
           }
-
+          console.log(projectID);
           const data = await getData(
             "/leads/",
             HttpMethod.GET,
@@ -192,7 +209,7 @@ export default function HomePage() {
       delayedFetch.cancel();
       controller.abort();
     };
-  }, [searchText, budgetRangeID, propertyTypeID, deliveryRangeID]); // Empty dependency array ensures that the effect runs once after the initial render
+  }, [searchText, budgetRangeID, locationID, projectID]); // Empty dependency array ensures that the effect runs once after the initial render
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", padding: 2 }}>
@@ -215,7 +232,7 @@ export default function HomePage() {
               onChange={handleBudgetChange}
               label="Budget"
             >
-              <MenuItem value={0}>None</MenuItem>
+              <MenuItem>None</MenuItem>
               {budgetRanges.map((bg) => (
                 <MenuItem key={bg.id} value={bg.id}>
                   {formatNumber(bg.min) + "-" + formatNumber(bg.max)}
@@ -226,17 +243,17 @@ export default function HomePage() {
         </Grid>
         <Grid item>
           <FormControl variant="outlined">
-            <InputLabel>Unit Type</InputLabel>
+            <InputLabel>Location</InputLabel>
             <Select
               sx={{ minWidth: 200 }}
-              value={propertyType}
-              onChange={handlePropertyTypeChange}
+              value={locationID}
+              onChange={handleLocationChange}
               label="Location Type"
             >
-              <MenuItem value={0}>None</MenuItem>
-              {propertyTypes.map((pt) => (
+              <MenuItem>None</MenuItem>
+              {locations.map((pt) => (
                 <MenuItem key={pt.id} value={pt.id}>
-                  {pt.type}
+                  {pt.area}
                 </MenuItem>
               ))}
             </Select>
@@ -244,31 +261,37 @@ export default function HomePage() {
         </Grid>
         <Grid item>
           <FormControl variant="outlined">
-            <InputLabel>Delivery Range</InputLabel>
+            <InputLabel>Project</InputLabel>
             <Select
               sx={{ minWidth: 200 }}
-              value={deliveryRange}
-              onChange={handleDeliveryRangeChange}
+              value={projectID}
+              onChange={handleProjectChange}
               label="Delivery Range"
             >
-              <MenuItem value={0}>None</MenuItem>
-              {deliveryRanges.map((dr) => (
+              <MenuItem>None</MenuItem>
+              {projects.map((dr) => (
                 <MenuItem key={dr.id} value={dr.id}>
-                  {dr.min + "-" + dr.max}
+                  {dr.name}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
         </Grid>
-        {AdminOwner.includes(user?.position.id) && (
-          <Grid sx={{ mx: 2 }} alignItems="center" container item>
-            <Link href="/leads/add" passHref>
-              <Fab color="primary" aria-label="add">
-                <AddIcon />
-              </Fab>
-            </Link>
-          </Grid>
-        )}
+        <Grid sx={{ mx: 2 }} alignItems="center" container item>
+          <Link
+            href={{
+              pathname: "/leads/add",
+              query: {
+                type: ContactType.LEAD,
+              },
+            }}
+            passHref
+          >
+            <Fab color="primary" aria-label="add">
+              <AddIcon />
+            </Fab>
+          </Link>
+        </Grid>
         {(filtersLoading || leadLoading) && (
           <Grid item xs={12} alignItems={"center"} textAlign={"center"}>
             <LinearProgress />
@@ -282,11 +305,15 @@ export default function HomePage() {
             <Grid key={lead.id} item>
               <ContactCard
                 name={lead.name}
-                email={lead.email}
+                // email={lead.email}
                 phone={lead.phone}
-                jobTitle={lead.job_title.title}
-                areaType={lead.interests[0].property_type.type}
-                budgetRange={formatBudgetRange(lead.interests[0].budget_range)}
+                jobTitle={lead.job_title?.title}
+                area={lead.interests.at(0)?.area?.area}
+                project={lead.interests.at(0)?.project?.name}
+                // areaType={lead.interests.at(0)?.property_type?.type}
+                budgetRange={formatBudgetRange(
+                  lead.interests.at(0)?.budget_range
+                )}
                 contactType={ContactType.LEAD}
                 employees={employees}
                 leadStatus={lead.status.id}

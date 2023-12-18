@@ -8,11 +8,12 @@ export enum AccountStatus {
   HOT = 1,
   WARM = 2,
   COLD = 3,
+  NEW = 4,
 }
 
 export enum Gender {
-  MALE = "male",
-  FEMALE = "female",
+  MALE = "Male",
+  FEMALE = "Female",
 }
 
 export enum AccountType {
@@ -38,4 +39,15 @@ export enum Position {
   SENIOR = 3,
   JUNIOR = 4,
   ADMIN = 5,
+}
+
+export enum LeadType {
+  CAMPAIGN = 1,
+  COLD_CALL = 2,
+}
+
+export enum CreateType {
+  CAMPAIGN = "campaign",
+  COLD_CALL = "cold_call",
+  PERSONAL = "personal",
 }

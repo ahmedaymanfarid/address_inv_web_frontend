@@ -21,7 +21,13 @@ export const signin = async (
   });
 
   if (!res.ok) {
-    return Promise.reject(res);
+    if (res.status === 401) {
+      throw new Error("Invalid credentials");
+    } else if (res.status === 400) {
+      throw new Error("Inactive user");
+    } else {
+      throw new Error("Something went wrong");
+    }
   }
 
   const data = await res.json();

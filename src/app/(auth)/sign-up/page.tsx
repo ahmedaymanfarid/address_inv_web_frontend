@@ -1,6 +1,8 @@
 "use client";
 import { HttpMethod, getData } from "@/utils/api";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import { LinearProgress } from "@mui/material";
+import Alert from "@mui/material/Alert";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -29,8 +31,9 @@ function Copyright(props: any) {
     </Typography>
   );
 }
-
 export default function SignUp() {
+  const [error, setError] = React.useState<string>("");
+  const [loading, setLoading] = React.useState<boolean>(false);
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (event.currentTarget.reportValidity() === false) {
@@ -49,8 +52,16 @@ export default function SignUp() {
       personal_phone: data.get("personal-phone"),
       password: data.get("password"),
     };
-
-    await getData(`/employees/register`, HttpMethod.PUT, undefined, body);
+    try {
+      setLoading(true);
+      await getData(`/employees/register`, HttpMethod.PUT, undefined, body);
+    } catch (error: any) {
+      setError(error.message);
+      return;
+    } finally {
+      setLoading(false);
+    }
+    window.location.href = "/sign-in";
   };
 
   return (
@@ -73,9 +84,13 @@ export default function SignUp() {
         <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
+              {loading && <LinearProgress />}
+            </Grid>
+            <Grid item xs={12}>
               <TextField
                 fullWidth
                 required
+                disabled={loading}
                 id="business-email"
                 label="Business Email Address"
                 name="business-email"
@@ -85,6 +100,7 @@ export default function SignUp() {
             <Grid item xs={12}>
               <TextField
                 fullWidth
+                disabled={loading}
                 id="personal-email"
                 label="Personal Email Address"
                 name="personal-email"
@@ -94,6 +110,7 @@ export default function SignUp() {
             <Grid item xs={12}>
               <TextField
                 fullWidth
+                disabled={loading}
                 id="personal-phone"
                 label="Personal Phone Number"
                 name="personal-phone"
@@ -104,6 +121,7 @@ export default function SignUp() {
               <TextField
                 required
                 fullWidth
+                disabled={loading}
                 name="password"
                 label="Password"
                 type="password"
@@ -115,6 +133,7 @@ export default function SignUp() {
               <TextField
                 required
                 fullWidth
+                disabled={loading}
                 name="confirm-password"
                 label="Confirm Password"
                 type="password"
@@ -122,10 +141,14 @@ export default function SignUp() {
                 autoComplete="new-password"
               />
             </Grid>
+            <Grid item xs={12}>
+              {error && <Alert severity="error">{error}</Alert>}
+            </Grid>
           </Grid>
           <Button
             type="submit"
             fullWidth
+            disabled={loading}
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
           >
