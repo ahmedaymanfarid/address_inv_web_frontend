@@ -3,12 +3,13 @@ import { components } from "@/interfaces/db_interfaces";
 import {
   AccountStatus,
   ContactType,
+  CreateType,
   LeadStatus,
   LeadType,
 } from "@/interfaces/enums";
 import { AdminOwner, AdminOwnerTeamLeader } from "@/interfaces/scopes";
 import { HttpMethod, getData, getUser } from "@/utils/api";
-import { Delete } from "@mui/icons-material";
+import { Create, Delete } from "@mui/icons-material";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import BadgeIcon from "@mui/icons-material/Badge";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -86,7 +87,11 @@ const ContactCard: React.FC<ContactCardProps> = ({
   const [user, setUser] = React.useState<components["schemas"]["Employee"]>();
 
   const [loading, setLoading] = React.useState<boolean>(false);
-
+  const createType = leadType
+    ? leadType === LeadType.CAMPAIGN
+      ? CreateType.CAMPAIGN
+      : CreateType.COLD_CALL
+    : CreateType.PERSONAL;
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setMenuAnchor(event.currentTarget);
   };
@@ -225,7 +230,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
       <CardHeader
         action={
           (contactType !== ContactType.LEAD ||
-            AdminOwner.includes(user?.position.id as number)) && (
+            AdminOwnerTeamLeader.includes(user?.position.id as number)) && (
             <IconButton onClick={handleMenuClick}>
               <MoreVertIcon />
             </IconButton>
@@ -252,7 +257,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
                     name: name,
                     phone: phone,
                     assignedTo: assignedTo,
-                    accountType: contactType,
+                    accountType: createType,
                   },
                 }}
               >
@@ -263,25 +268,28 @@ const ContactCard: React.FC<ContactCardProps> = ({
           {contactType !== ContactType.LEAD && (
             <MenuItem onClick={handleStatusChangeClick}>Change status</MenuItem>
           )}
-          {AdminOwner.includes(user?.position.id as number) &&
+          {AdminOwnerTeamLeader.includes(user?.position.id as number) &&
             (contactType === ContactType.LEAD ||
               contactType === ContactType.COMPANY) && (
               <MenuItem onClick={handleAssignClick}>
                 {leadStatus === LeadStatus.NOT_ASSIGNED ? "Assign" : "Rotate"}
               </MenuItem>
             )}
-          {AdminOwner.includes(user?.position.id as number) &&
+          {AdminOwnerTeamLeader.includes(user?.position.id as number) &&
             (contactType === ContactType.LEAD ||
               contactType === ContactType.COMPANY) &&
             leadStatus !== LeadStatus.NOT_ASSIGNED && (
               <MenuItem onClick={handleUnassign}>Unassign</MenuItem>
             )}
-          <MenuItem onClick={handleDelete}>
-            <ListItemIcon>
-              <DeleteIcon color="error" fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Delete</ListItemText>
-          </MenuItem>
+          {(contactType === ContactType.SALES ||
+            AdminOwnerTeamLeader.includes(user?.position.id as number)) && (
+            <MenuItem onClick={handleDelete}>
+              <ListItemIcon>
+                <DeleteIcon color="error" fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Delete</ListItemText>
+            </MenuItem>
+          )}
         </Menu>
         {/* Chips (can wrap below the name and job title) */}
         {contactType === ContactType.COMPANY ? (

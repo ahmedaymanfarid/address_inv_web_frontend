@@ -23,17 +23,17 @@ export default function ViewLead() {
       }}
     >
       <Grid spacing={3} justifyContent={"center"} container>
-        <Grid item>
+        <Grid width={370} item>
           <DetailsView
             type={ContactType.LEAD}
             phone={phone}
             setPhone={setPhone}
           />
         </Grid>
-        <Grid minWidth={350} item>
+        <Grid width={350} item>
           <NotesView type={ContactType.LEAD} phone={phone} />
         </Grid>
-        <Grid minWidth={350} item>
+        <Grid width={350} item>
           <ActionsView type={ContactType.LEAD} phone={phone} />
         </Grid>
       </Grid>

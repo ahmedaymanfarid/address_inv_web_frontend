@@ -389,10 +389,9 @@ export default function DetailsView({
                 </Avatar>
               }
             /> */}
-        <CardContent sx={{ minWidth: 350 }}>
+        <CardContent>
           {!detailsLoading && (
             <Box
-              minWidth={350}
               display={"flex"}
               flexDirection={"column"}
               component="form"
@@ -553,7 +552,8 @@ export default function DetailsView({
                 sx={viewOnlyStyle}
                 variant="standard"
                 defaultValue={lead?.assigned_to?.id}
-                disabled={!editing || type === ContactType.SALES}
+                // disabled={!editing || type === ContactType.SALES}
+                disabled={true}
                 select
                 margin="normal"
                 id="assignedTo"

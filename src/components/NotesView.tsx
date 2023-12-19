@@ -6,6 +6,7 @@ import { formatReadableDate } from "@/utils/format";
 import AddCommentIcon from "@mui/icons-material/AddComment";
 import CommentIcon from "@mui/icons-material/Comment";
 import DeleteIcon from "@mui/icons-material/Delete";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import { IconButton } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
@@ -21,7 +22,6 @@ import Typography from "@mui/material/Typography";
 import dayjs from "dayjs";
 import debounce from "lodash.debounce";
 import React from "react";
-
 export default function NotesView({
   type,
   phone,
@@ -117,7 +117,12 @@ export default function NotesView({
     <Box>
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <CommentIcon sx={{ mr: 1 }} />
-        <Typography variant="h5">Notes</Typography>
+        <Typography variant="h5">
+          Notes{" "}
+          <IconButton onClick={() => setNotesReload(!notesReload)}>
+            <RefreshIcon sx={{ alignContent: "center" }} />
+          </IconButton>
+        </Typography>
       </Box>
       {notesLoading ? (
         <LinearProgress sx={{ my: 2 }} />

@@ -1,6 +1,13 @@
 "use client";
 import { components } from "@/interfaces/db_interfaces";
-import { AccountStatus, AccountType, ActionType } from "@/interfaces/enums";
+import {
+  AccountStatus,
+  AccountType,
+  ActionType,
+  ContactType,
+  CreateType,
+  LeadType,
+} from "@/interfaces/enums";
 import { HttpMethod, getData } from "@/utils/api";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import { Checkbox, FormControlLabel, Radio, RadioGroup } from "@mui/material";
@@ -22,7 +29,9 @@ import { useSearchParams } from "next/navigation";
 export default function AddAction() {
   // account variables
   const searchParams = useSearchParams();
-  const [accountType, setAccountType] = React.useState<string>("");
+
+  const [user, setUser] = React.useState<components["schemas"]["Employee"]>();
+  const [type, setType] = React.useState<CreateType>(CreateType.CAMPAIGN);
   const [account, setAccount] = React.useState<string>("");
   const [accountEnabled, setAccountEnabled] = React.useState<boolean>(false);
   const [accountTypeEnabled, setAccountTypeEnabled] =
@@ -62,10 +71,6 @@ export default function AddAction() {
     components["schemas"]["status"][]
   >([]);
   const [accountStatus, setAccountStatus] = React.useState<AccountStatus>();
-  const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setAccountEnabled(true);
-    setAccountType(event.target.value);
-  };
 
   const handleAccountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAccount(event.target.value);
@@ -82,7 +87,7 @@ export default function AddAction() {
     };
 
     let endpoint = "";
-    if (accountType === AccountType.SALES) {
+    if (type === CreateType.PERSONAL) {
       body["sales_account_phone"] = phone;
 
       if (currentActionType === ActionType.CALL) {
@@ -108,11 +113,11 @@ export default function AddAction() {
         phone: phone,
       };
       let notesEndpoint = "";
-      if (accountType === AccountType.SALES) {
+      if (type === CreateType.PERSONAL) {
         notesBody["assigned_to_id"] = assignedTo;
         notesEndpoint = "/accounts/sales/notes";
       } else {
-        notesEndpoint = "/leads/notes";
+        notesEndpoint = "/leads/notes/";
       }
       await getData(notesEndpoint, HttpMethod.POST, undefined, notesBody);
     }
@@ -126,8 +131,7 @@ export default function AddAction() {
     };
 
     let endpoint = "";
-    console.log(accountType);
-    if (accountType === AccountType.SALES) {
+    if (type === CreateType.PERSONAL) {
       body["sales_account_phone"] = phone;
 
       if (nextActionType === ActionType.CALL) {
@@ -154,11 +158,11 @@ export default function AddAction() {
         phone: phone,
       };
       let notesEndpoint = "";
-      if (accountType === AccountType.SALES) {
+      if (type === CreateType.PERSONAL) {
         notesBody["assigned_to_id"] = assignedTo;
         notesEndpoint = "/accounts/sales/notes";
       } else {
-        notesEndpoint = "/leads/notes";
+        notesEndpoint = "/leads/notes/";
       }
       await getData(notesEndpoint, HttpMethod.POST, undefined, notesBody);
     }
@@ -195,7 +199,7 @@ export default function AddAction() {
     };
     fetchData();
     if (searchParams.has("accountType")) {
-      setAccountType(searchParams.get("accountType") as string);
+      setType(searchParams.get("accountType") as CreateType);
     }
     if (searchParams.has("phone") && searchParams.has("assignedTo")) {
       setAccount(
@@ -231,20 +235,26 @@ export default function AddAction() {
             noValidate
             sx={{ mt: 1 }}
           >
-            <RadioGroup onChange={handleTypeChange} value={accountType} row>
-              <FormControlLabel
-                disabled={!accountTypeEnabled}
-                value={AccountType.SALES}
-                control={<Radio />}
-                label="Sales"
-              />
-              <FormControlLabel
-                disabled={!accountTypeEnabled}
-                value={AccountType.COMPANY}
-                control={<Radio />}
-                label="Company"
-              />
-            </RadioGroup>
+            <TextField
+              margin="normal"
+              select
+              value={type}
+              onChange={(event) => {
+                setAccountEnabled(true);
+                setType(event.target.value as CreateType);
+              }}
+              fullWidth
+              id="type"
+              label="Source"
+              name="type"
+            >
+              <MenuItem value={CreateType.CAMPAIGN}>Campaign</MenuItem>
+              <MenuItem value={CreateType.COLD_CALL}>Cold Call</MenuItem>
+              {(searchParams.get("type") as ContactType) !==
+                ContactType.LEAD && (
+                <MenuItem value={CreateType.PERSONAL}>Personal</MenuItem>
+              )}
+            </TextField>
             <TextField
               select
               disabled={!accountEnabled}
@@ -258,29 +268,41 @@ export default function AddAction() {
               name="account"
               autoComplete="name"
             >
-              {accountType != "" ? (
-                accountType === AccountType.SALES ? (
-                  salesAccounts.map((account) => (
-                    <MenuItem
-                      key={`${account.phone}~${account.assigned_to_id}`}
-                      value={`${account.phone}~${account.assigned_to_id}`}
-                    >
-                      {account.name}
-                    </MenuItem>
-                  ))
-                ) : (
-                  companyAccounts.map((account) => (
-                    <MenuItem
-                      key={`${account.phone}~${account.assigned_to_id}`}
-                      value={`${account.phone}~${account.assigned_to_id}`}
-                    >
-                      {account.lead.name}
-                    </MenuItem>
-                  ))
-                )
-              ) : (
-                <></>
-              )}
+              {type &&
+                (type === CreateType.PERSONAL
+                  ? salesAccounts.map((account) => (
+                      <MenuItem
+                        key={`${account.phone}~${account.assigned_to_id}`}
+                        value={`${account.phone}~${account.assigned_to_id}`}
+                      >
+                        {account.name}
+                      </MenuItem>
+                    ))
+                  : type === CreateType.CAMPAIGN
+                  ? companyAccounts
+                      .filter((account) => {
+                        return account.lead.type_id === LeadType.CAMPAIGN;
+                      })
+                      .map((account) => (
+                        <MenuItem
+                          key={`${account.phone}~${account.assigned_to_id}`}
+                          value={`${account.phone}~${account.assigned_to_id}`}
+                        >
+                          {account.lead.name}
+                        </MenuItem>
+                      ))
+                  : companyAccounts
+                      .filter((account) => {
+                        return account.lead.type_id === LeadType.COLD_CALL;
+                      })
+                      .map((account) => (
+                        <MenuItem
+                          key={`${account.phone}~${account.assigned_to_id}`}
+                          value={`${account.phone}~${account.assigned_to_id}`}
+                        >
+                          {account.lead.name}
+                        </MenuItem>
+                      )))}
             </TextField>
             <FormControlLabel
               control={

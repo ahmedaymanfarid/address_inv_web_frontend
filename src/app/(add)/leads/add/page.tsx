@@ -189,7 +189,7 @@ export default function AddLead() {
         body["type_id"] = LeadType.COLD_CALL;
       }
       if (data.get("assignedTo") !== "") {
-        params["assigned_to"] = data.get("assignedTo");
+        params["assigned_to"] = assignedTo;
       }
     }
 

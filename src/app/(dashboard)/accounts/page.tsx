@@ -45,22 +45,25 @@ export default function TasksPage() {
   const [budget, setBudget] = useState("");
   const [budgetRangeID, setBudgetRangeID] = useState<number>();
 
-  const [propertyTypes, setPropertyTypes] = useState<
-    components["schemas"]["PropertyType"][]
-  >([]);
-  const [propertyType, setPropertyType] = useState<string>("");
-  const [propertyTypeID, setPropertyTypeID] = useState<number>(0);
-
-  const [deliveryRanges, setDeliveryRanges] = useState<
-    components["schemas"]["RangeInt"][]
-  >([]);
-  const [deliveryRange, setDeliveryRange] = useState<string>("");
-  const [deliveryRangeID, setDeliveryRangeID] = useState<number>(0);
-
   const [areas, setAreas] = useState<components["schemas"]["Area"][]>([]);
 
   const [searchText, setSearchText] = useState<string>("");
+  const [locations, setLocations] = useState<components["schemas"]["Area"][]>(
+    []
+  );
+  const [locationID, setLocationID] = useState<number>();
+  const [projects, setProjects] = useState<components["schemas"]["Project"][]>(
+    []
+  );
 
+  const handleLocationChange = (event: any) => {
+    setLocationID(event.target.value);
+  };
+
+  const handleProjectChange = (event: any) => {
+    setProjectID(event.target.value);
+  };
+  const [projectID, setProjectID] = useState<number>();
   const handleSearchChange = (event: any) => {
     setSearchText(event.target.value);
   };
@@ -68,16 +71,6 @@ export default function TasksPage() {
   const handleBudgetChange = (event: any) => {
     setBudgetRangeID(event.target.value);
     setBudget(event.target.value);
-  };
-
-  const handlePropertyTypeChange = (event: any) => {
-    setPropertyTypeID(event.target.value);
-    setPropertyType(event.target.value);
-  };
-
-  const handleDeliveryRangeChange = (event: any) => {
-    setDeliveryRangeID(event.target.value);
-    setDeliveryRange(event.target.value);
   };
 
   const [filtersLoading, setFiltersLoading] = useState<boolean>(false);
@@ -99,16 +92,16 @@ export default function TasksPage() {
             undefined,
             signal
           );
-          const propertyData = await getData(
-            "/property_types/",
+          const locationsData = await getData(
+            "/areas/",
             HttpMethod.GET,
             undefined,
             undefined,
             undefined,
             signal
           );
-          const deliveryData = await getData(
-            "/delivery_ranges/",
+          const projectsData = await getData(
+            "/projects/",
             HttpMethod.GET,
             undefined,
             undefined,
@@ -117,8 +110,9 @@ export default function TasksPage() {
           );
           // Handle the result
           SetBudgetRanges(budgetData);
-          setPropertyTypes(propertyData);
-          setDeliveryRanges(deliveryData);
+          setLocations(locationsData);
+          setProjects(projectsData);
+
           const employeeData = await getData(
             "/employees/",
             HttpMethod.GET,
@@ -163,12 +157,12 @@ export default function TasksPage() {
             params["budget_range_id"] = budgetRangeID;
           }
 
-          if (propertyTypeID) {
-            params["property_type?_id"] = propertyTypeID;
+          if (locationID) {
+            params["area_id"] = locationID;
           }
 
-          if (deliveryRangeID) {
-            params["delivery_range_id"] = deliveryRangeID;
+          if (projectID !== undefined && projectID !== -1) {
+            params["project_id"] = projectID;
           }
 
           const salesAccountsData = await getData(
@@ -203,7 +197,7 @@ export default function TasksPage() {
       delayedFetch.cancel();
       controller.abort();
     };
-  }, [searchText, budgetRangeID, propertyTypeID, deliveryRangeID]);
+  }, [searchText, budgetRangeID, locationID, projectID]);
   return (
     <Box sx={{ display: "flex", flexDirection: "column", padding: 2 }}>
       <Grid container spacing={2} sx={{ mt: 2, mb: 4 }}>
@@ -225,7 +219,7 @@ export default function TasksPage() {
               onChange={handleBudgetChange}
               label="Budget"
             >
-              <MenuItem value={0}>None</MenuItem>
+              <MenuItem>None</MenuItem>
               {budgetRanges.map((bg) => (
                 <MenuItem key={bg.id} value={bg.id}>
                   {formatNumber(bg.min) + "-" + formatNumber(bg.max)}
@@ -236,17 +230,17 @@ export default function TasksPage() {
         </Grid>
         <Grid item>
           <FormControl variant="outlined">
-            <InputLabel>Unit Type</InputLabel>
+            <InputLabel>Location</InputLabel>
             <Select
               sx={{ minWidth: 200 }}
-              value={propertyType}
-              onChange={handlePropertyTypeChange}
+              value={locationID}
+              onChange={handleLocationChange}
               label="Location Type"
             >
-              <MenuItem value={0}>None</MenuItem>
-              {propertyTypes.map((pt) => (
+              <MenuItem>None</MenuItem>
+              {locations.map((pt) => (
                 <MenuItem key={pt.id} value={pt.id}>
-                  {pt.type}
+                  {pt.area}
                 </MenuItem>
               ))}
             </Select>
@@ -254,17 +248,17 @@ export default function TasksPage() {
         </Grid>
         <Grid item>
           <FormControl variant="outlined">
-            <InputLabel>Delivery Range</InputLabel>
+            <InputLabel>Project</InputLabel>
             <Select
               sx={{ minWidth: 200 }}
-              value={deliveryRange}
-              onChange={handleDeliveryRangeChange}
+              value={projectID}
+              onChange={handleProjectChange}
               label="Delivery Range"
             >
-              <MenuItem value={0}>None</MenuItem>
-              {deliveryRanges.map((dr) => (
+              <MenuItem>None</MenuItem>
+              {projects.map((dr) => (
                 <MenuItem key={dr.id} value={dr.id}>
-                  {dr.min + "-" + dr.max}
+                  {dr.name}
                 </MenuItem>
               ))}
             </Select>
