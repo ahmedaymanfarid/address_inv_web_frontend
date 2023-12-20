@@ -1,5 +1,6 @@
 import LogOutItem from "@/components/LogoutItem";
 import ThemeRegistry from "@/components/ThemeRegistry/ThemeRegistry";
+import UserNameItem from "@/components/UserNameItem";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import ContactsIcon from "@mui/icons-material/Contacts";
@@ -84,14 +85,15 @@ export default function RootLayout({
             </List>
             <Divider sx={{ mt: "auto" }} />
             <List>
-              <ListItem disablePadding>
-                <ListItemButton>
+              {/*<ListItem disablePadding>
+                 <ListItemButton>
                   <ListItemIcon>
                     <AccountBoxIcon />
                   </ListItemIcon>
                   <ListItemText primary="My Account" />
                 </ListItemButton>
-              </ListItem>
+              </ListItem> */}
+              <UserNameItem icon={AccountBoxIcon} />
               <LogOutItem text="Logout" icon={LogoutIcon} />
             </List>
           </Drawer>

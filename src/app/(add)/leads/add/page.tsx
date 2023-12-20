@@ -19,7 +19,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import DoNotDisturbIcon from "@mui/icons-material/DoNotDisturb";
 import HistoryIcon from "@mui/icons-material/History";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
-import { IconButton, LinearProgress } from "@mui/material";
+import { Alert, IconButton, LinearProgress } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -43,6 +43,7 @@ export default function AddLead() {
   /* States */
   const [user, setUser] = React.useState<components["schemas"]["Employee"]>();
   const [type, setType] = React.useState<CreateType>(CreateType.CAMPAIGN);
+  const [error, setError] = React.useState<string>("");
   const [gender, setGender] = React.useState<string>(Gender.MALE);
   const [phones, setPhones] = React.useState<Phone[]>([]);
   const [assignedTo, setAssignedTo] = React.useState<number>(0);
@@ -72,6 +73,27 @@ export default function AddLead() {
 
   const endpoint = type === CreateType.PERSONAL ? "/accounts/sales" : "/leads/";
 
+  /* Error handler */
+
+  const handleSalesAccountError = (status: number, message: string) => {
+    console.error(`Custom error handler: ${status} - ${message}`);
+
+    if (status === 404) {
+      throw new Error("Assigned to Employee not found");
+    } else if (status === 409) {
+      throw new Error("Phone number already exists");
+    } else if (status === 422) {
+      throw new Error("Check your inputs");
+    } else {
+      throw new Error("Something went wrong");
+    }
+  };
+
+  const handleLeadError = (status: number, message: string) => {
+    throw new Error(message);
+  };
+  const handleFetchError =
+    type === CreateType.CAMPAIGN ? handleLeadError : handleSalesAccountError;
   /* Handlers */
   const handleAddPhone = () => {
     const newPhone: Phone = { id: phones.length + 1, number: "" };
@@ -193,13 +215,17 @@ export default function AddLead() {
       }
     }
 
-    await getData(endpoint, HttpMethod.POST, params, body).then((data) => {
-      if (type !== CreateType.PERSONAL) {
-        window.location.href = "/leads";
-      } else {
-        window.location.href = "/accounts";
-      }
-    });
+    await getData(endpoint, HttpMethod.POST, params, body, handleFetchError)
+      .then((data) => {
+        if (type !== CreateType.PERSONAL) {
+          window.location.href = "/leads";
+        } else {
+          window.location.href = "/accounts";
+        }
+      })
+      .catch((error) => {
+        setError(error.message);
+      });
   };
 
   React.useEffect(() => {
@@ -507,6 +533,7 @@ export default function AddLead() {
               </MenuItem>
             ))}
           </TextField>
+          {error && <Alert severity="error">{error}</Alert>}
           <Button
             type="submit"
             fullWidth

@@ -62,21 +62,18 @@ export const getData = async (
       signal: combinedSignal, // Use the combined signal
     });
 
+    const data = await response.json();
     if (!response.ok) {
+      const detail = data.detail;
+      if (detail === undefined) {
+        throw new Error(`${response.status}: ${response.statusText}`);
+      }
       if (errorHandler) {
-        errorHandler(response.status, response.statusText);
-      } else if (response.status === 404) {
-        throw new Error("Employee not found");
-      } else if (response.status === 400) {
-        throw new Error("Employee already registered");
-      } else if (response.status === 422) {
-        throw new Error("Check your inputs");
+        errorHandler(response.status, detail);
       } else {
-        throw new Error("Something went wrong");
+        throw new Error(detail);
       }
     }
-
-    const data = await response.json();
     return data;
   } catch (error) {
     // Handle network errors or other issues

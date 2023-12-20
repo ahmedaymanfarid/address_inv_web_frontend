@@ -34,6 +34,20 @@ function Copyright(props: any) {
 export default function SignUp() {
   const [error, setError] = React.useState<string>("");
   const [loading, setLoading] = React.useState<boolean>(false);
+
+  const handleCustomError = (status: number, message: string) => {
+    // Custom logic to handle errors
+    console.error(`Custom error handler: ${status} - ${message}`);
+
+    if (status === 404) {
+      throw new Error("Employee not found");
+    } else if (status === 400) {
+      throw new Error("Employee already registered");
+    } else if (status === 422) {
+      throw new Error("Check your inputs");
+    }
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (event.currentTarget.reportValidity() === false) {
@@ -54,7 +68,13 @@ export default function SignUp() {
     };
     try {
       setLoading(true);
-      await getData(`/employees/register`, HttpMethod.PUT, undefined, body);
+      await getData(
+        `/employees/register`,
+        HttpMethod.PUT,
+        undefined,
+        body,
+        handleCustomError
+      );
     } catch (error: any) {
       setError(error.message);
       return;

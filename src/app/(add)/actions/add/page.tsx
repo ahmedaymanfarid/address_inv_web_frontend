@@ -10,7 +10,13 @@ import {
 } from "@/interfaces/enums";
 import { HttpMethod, getData } from "@/utils/api";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
-import { Checkbox, FormControlLabel, Radio, RadioGroup } from "@mui/material";
+import {
+  Alert,
+  Checkbox,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+} from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -24,6 +30,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import React from "react";
 
+import { set } from "date-fns";
 import { useSearchParams } from "next/navigation";
 
 export default function AddAction() {
@@ -32,8 +39,9 @@ export default function AddAction() {
 
   const [user, setUser] = React.useState<components["schemas"]["Employee"]>();
   const [type, setType] = React.useState<CreateType>(CreateType.CAMPAIGN);
+  const [error, setError] = React.useState<string>("");
   const [account, setAccount] = React.useState<string>("");
-  const [accountEnabled, setAccountEnabled] = React.useState<boolean>(false);
+  const [accountEnabled, setAccountEnabled] = React.useState<boolean>(true);
   const [accountTypeEnabled, setAccountTypeEnabled] =
     React.useState<boolean>(true);
   const [assignedTo, setAssignedTo] = React.useState<number>();
@@ -104,9 +112,13 @@ export default function AddAction() {
       }
     }
 
-    await getData(endpoint, HttpMethod.POST, undefined, body).then((data) => {
-      console.log(data);
-    });
+    await getData(endpoint, HttpMethod.POST, undefined, body)
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        setError(error.message);
+      });
     if (data.get("currentNotes") !== "") {
       const notesBody: { [key: string]: any } = {
         notes: data.get("currentNotes"),
@@ -148,9 +160,13 @@ export default function AddAction() {
       }
     }
 
-    await getData(endpoint, HttpMethod.POST, undefined, body).then((data) => {
-      console.log(data);
-    });
+    await getData(endpoint, HttpMethod.POST, undefined, body)
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        setError(error.message);
+      });
 
     if (data.get("nextNotes") !== "") {
       const notesBody: { [key: string]: any } = {
@@ -164,7 +180,11 @@ export default function AddAction() {
       } else {
         notesEndpoint = "/leads/notes/";
       }
-      await getData(notesEndpoint, HttpMethod.POST, undefined, notesBody);
+      await getData(notesEndpoint, HttpMethod.POST, undefined, notesBody).catch(
+        (error) => {
+          setError(error.message);
+        }
+      );
     }
   };
 
@@ -458,6 +478,7 @@ export default function AddAction() {
               label="Notes"
               name="nextNotes"
             />
+            {error && <Alert severity="error">{error}</Alert>}
             <Button
               disabled={!(currentEnabled || followUpEnabled)}
               type="submit"

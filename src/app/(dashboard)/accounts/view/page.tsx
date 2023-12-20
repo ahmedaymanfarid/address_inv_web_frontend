@@ -29,7 +29,7 @@ export default function ViewLead() {
       }}
     >
       <Grid spacing={3} justifyContent={"center"} container>
-        <Grid item>
+        <Grid width={370} item>
           <DetailsView
             type={type}
             phone={phone}
