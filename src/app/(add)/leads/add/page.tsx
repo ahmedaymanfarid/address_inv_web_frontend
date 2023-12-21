@@ -8,7 +8,18 @@ import {
   LeadType,
 } from "@/interfaces/enums";
 import { AdminOwnerTeamLeader } from "@/interfaces/scopes";
-import { HttpMethod, getData, getUser } from "@/utils/api";
+import {
+  HttpMethod,
+  getAreas,
+  getBudgetRanges,
+  getData,
+  getDeliveryRanges,
+  getEmployees,
+  getJobTitles,
+  getProjects,
+  getPropertyTypes,
+  getUser,
+} from "@/utils/api";
 import { formatBudgetRange, formatDeliveryRange } from "@/utils/format";
 import AddIcon from "@mui/icons-material/Add";
 import AddCommentIcon from "@mui/icons-material/AddComment";
@@ -237,25 +248,25 @@ export default function AddLead() {
           setUser(data);
           setAssignedTo(data.id);
         });
-        await getData("/job_titles/", HttpMethod.GET).then((data) => {
+        await getJobTitles().then((data) => {
           setJobTitles(data);
         });
-        await getData("/budget_ranges/", HttpMethod.GET).then((data) => {
+        await getBudgetRanges().then((data) => {
           SetBudgetRanges(data);
         });
-        await getData("/delivery_ranges/", HttpMethod.GET).then((data) => {
+        await getDeliveryRanges().then((data) => {
           setDeliveryRanges(data);
         });
-        await getData("/property_types/", HttpMethod.GET).then((data) => {
+        await getPropertyTypes().then((data) => {
           setPropertyTypes(data);
         });
-        await getData("/areas/", HttpMethod.GET).then((data) => {
+        await getAreas().then((data) => {
           setAreas(data);
         });
-        await getData("/employees/", HttpMethod.GET).then((data) => {
+        await getEmployees().then((data) => {
           setEmployees(data);
         });
-        await getData("/projects/", HttpMethod.GET).then((data) => {
+        await getProjects().then((data) => {
           setProjects(data);
         });
       } finally {

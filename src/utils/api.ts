@@ -24,6 +24,78 @@ export const getUser = async (): Promise<components["schemas"]["Employee"]> => {
   }
 };
 
+export const getEmployees = async (
+  signal?: AbortSignal
+): Promise<components["schemas"]["Employee"][]> => {
+  return await getCachedData("/employees/", "employees", signal);
+};
+
+export const getBudgetRanges = async (
+  signal?: AbortSignal
+): Promise<components["schemas"]["RangeMoney"][]> => {
+  return await getCachedData("/budget_ranges/", "budget_ranges", signal);
+};
+
+export const getAreas = async (
+  signal?: AbortSignal
+): Promise<components["schemas"]["Area"][]> => {
+  return await getCachedData("/areas/", "areas", signal);
+};
+
+export const getProjects = async (
+  signal?: AbortSignal
+): Promise<components["schemas"]["Project"][]> => {
+  return await getData(
+    "/projects/",
+    HttpMethod.GET,
+    undefined,
+    undefined,
+    undefined,
+    signal
+  );
+};
+
+export const getDeliveryRanges = async (
+  signal?: AbortSignal
+): Promise<components["schemas"]["RangeInt"][]> => {
+  return await getCachedData("/delivery_ranges/", "delivery_ranges", signal);
+};
+
+export const getPropertyTypes = async (
+  signal?: AbortSignal
+): Promise<components["schemas"]["PropertyType"][]> => {
+  return await getCachedData("/property_types/", "property_types", signal);
+};
+
+export const getJobTitles = async (
+  signal?: AbortSignal
+): Promise<components["schemas"]["JobTitle"][]> => {
+  return await getCachedData("/job_titles/", "job_titles", signal);
+};
+
+export const getCachedData = async (
+  endpoint: string,
+  key: string,
+  signal?: AbortSignal // Added signal parameter
+): Promise<any> => {
+  if (sessionStorage.getItem(key)) {
+    return JSON.parse(sessionStorage.getItem(key)!);
+  }
+  const data = await getData(
+    endpoint,
+    HttpMethod.GET,
+    undefined,
+    undefined,
+    undefined,
+    signal
+  );
+  if (!data) {
+    throw new Error(`Failed to get ${key}`);
+  }
+  sessionStorage.setItem(key, JSON.stringify(data));
+  return data;
+};
+
 export const getData = async (
   endpoint: string,
   method: HttpMethod = HttpMethod.GET,

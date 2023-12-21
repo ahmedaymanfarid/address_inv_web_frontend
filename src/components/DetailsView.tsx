@@ -6,7 +6,18 @@ import {
   Gender,
   LeadType,
 } from "@/interfaces/enums";
-import { HttpMethod, getData } from "@/utils/api";
+import {
+  HttpMethod,
+  getAreas,
+  getBudgetRanges,
+  getCachedData,
+  getData,
+  getDeliveryRanges,
+  getEmployees,
+  getJobTitles,
+  getProjects,
+  getPropertyTypes,
+} from "@/utils/api";
 import { formatBudgetRange, formatDeliveryRange } from "@/utils/format";
 import AddIcon from "@mui/icons-material/Add";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
@@ -288,69 +299,19 @@ export default function DetailsView({
       const fetchInitialData = async () => {
         try {
           setInitialLoading(true);
-          const jobData = await getData(
-            "/job_titles/",
-            HttpMethod.GET,
-            undefined,
-            undefined,
-            undefined,
-            signal
-          );
+          const jobData = await getJobTitles(signal);
           setJobTitles(jobData);
-          const budgetData = await getData(
-            "/budget_ranges/",
-            HttpMethod.GET,
-            undefined,
-            undefined,
-            undefined,
-            signal
-          );
+          const budgetData = await getBudgetRanges(signal);
           SetBudgetRanges(budgetData);
-          const deliveryData = await getData(
-            "/delivery_ranges/",
-            HttpMethod.GET,
-            undefined,
-            undefined,
-            undefined,
-            signal
-          );
+          const deliveryData = await getDeliveryRanges(signal);
           setDeliveryRanges(deliveryData);
-          const propertyData = await getData(
-            "/property_types/",
-            HttpMethod.GET,
-            undefined,
-            undefined,
-            undefined,
-            signal
-          );
+          const propertyData = await getPropertyTypes(signal);
           setPropertyTypes(propertyData);
-          const areasData = await getData(
-            "/areas/",
-            HttpMethod.GET,
-            undefined,
-            undefined,
-            undefined,
-            signal
-          );
+          const areasData = await getAreas(signal);
           setAreas(areasData);
-          const employeeData = await getData(
-            "/employees/",
-            HttpMethod.GET,
-            undefined,
-            undefined,
-            undefined,
-            signal
-          );
+          const employeeData = await getEmployees(signal);
           setEmployees(employeeData);
-          const projectData = await getData(
-            "/projects/",
-            HttpMethod.GET,
-
-            undefined,
-            undefined,
-            undefined,
-            signal
-          );
+          const projectData = await getProjects(signal);
           setProjects(projectData);
         } catch (error) {
           // Handle errors

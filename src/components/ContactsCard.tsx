@@ -59,6 +59,9 @@ interface ContactCardProps {
   employees?: components["schemas"]["Employee"][];
   leadStatus?: LeadStatus;
   accountStatus?: AccountStatus;
+  reload?: boolean;
+  setReload?: React.Dispatch<React.SetStateAction<boolean>>;
+  parentLoading?: boolean;
 }
 
 const ContactCard: React.FC<ContactCardProps> = ({
@@ -77,6 +80,9 @@ const ContactCard: React.FC<ContactCardProps> = ({
   leadType,
   leadStatus,
   accountStatus,
+  reload,
+  setReload,
+  parentLoading,
 }) => {
   const [menuAnchor, setMenuAnchor] = React.useState<null | HTMLElement>(null);
   const [assignOpen, setAssignOpen] = React.useState(false);
@@ -135,7 +141,12 @@ const ContactCard: React.FC<ContactCardProps> = ({
       setLoading(false);
       handleAssignClose();
     }
-    window.location.reload();
+
+    if (reload !== undefined && setReload !== undefined) {
+      setReload(!reload);
+    } else {
+      window.location.reload();
+    }
   };
 
   const handleUnassign = async () => {
@@ -143,7 +154,11 @@ const ContactCard: React.FC<ContactCardProps> = ({
       lead_phone: phone,
     });
     handleMenuClose();
-    window.location.reload();
+    if (reload !== undefined && setReload !== undefined) {
+      setReload(!reload);
+    } else {
+      window.location.reload();
+    }
   };
 
   const handleStatusChange = async () => {
@@ -168,7 +183,12 @@ const ContactCard: React.FC<ContactCardProps> = ({
       setLoading(false);
     }
     handleStausChangeClose();
-    window.location.reload();
+
+    if (reload !== undefined && setReload !== undefined) {
+      setReload(!reload);
+    } else {
+      window.location.reload();
+    }
   };
 
   const handleDelete = async () => {
@@ -190,7 +210,11 @@ const ContactCard: React.FC<ContactCardProps> = ({
       }
     } finally {
       handleMenuClose();
-      window.location.reload();
+      if (reload !== undefined && setReload !== undefined) {
+        setReload(!reload);
+      } else {
+        window.location.reload();
+      }
     }
   };
 
@@ -266,12 +290,17 @@ const ContactCard: React.FC<ContactCardProps> = ({
             </MenuItem>
           )}
           {contactType !== ContactType.LEAD && (
-            <MenuItem onClick={handleStatusChangeClick}>Change status</MenuItem>
+            <MenuItem
+              disabled={parentLoading}
+              onClick={handleStatusChangeClick}
+            >
+              Change status
+            </MenuItem>
           )}
           {AdminOwnerTeamLeader.includes(user?.position.id as number) &&
             (contactType === ContactType.LEAD ||
               contactType === ContactType.COMPANY) && (
-              <MenuItem onClick={handleAssignClick}>
+              <MenuItem disabled={parentLoading} onClick={handleAssignClick}>
                 {leadStatus === LeadStatus.NOT_ASSIGNED ? "Assign" : "Rotate"}
               </MenuItem>
             )}
@@ -279,11 +308,13 @@ const ContactCard: React.FC<ContactCardProps> = ({
             (contactType === ContactType.LEAD ||
               contactType === ContactType.COMPANY) &&
             leadStatus !== LeadStatus.NOT_ASSIGNED && (
-              <MenuItem onClick={handleUnassign}>Unassign</MenuItem>
+              <MenuItem disabled={parentLoading} onClick={handleUnassign}>
+                Unassign
+              </MenuItem>
             )}
           {(contactType === ContactType.SALES ||
             AdminOwnerTeamLeader.includes(user?.position.id as number)) && (
-            <MenuItem onClick={handleDelete}>
+            <MenuItem disabled={parentLoading} onClick={handleDelete}>
               <ListItemIcon>
                 <DeleteIcon color="error" fontSize="small" />
               </ListItemIcon>
@@ -508,6 +539,7 @@ const ContactCard: React.FC<ContactCardProps> = ({
             onClick={() => {
               window.open(`https://wa.me/${phone.substring(1)}`, "_blank");
             }}
+            disabled={parentLoading}
           >
             WhatsApp
           </Button>
@@ -520,7 +552,9 @@ const ContactCard: React.FC<ContactCardProps> = ({
                 },
               }}
             >
-              <Button sx={{ flex: "1 1 0" }}>View</Button>
+              <Button disabled={parentLoading} sx={{ flex: "1 1 0" }}>
+                View
+              </Button>
             </Link>
           ) : (
             <Link
@@ -533,7 +567,9 @@ const ContactCard: React.FC<ContactCardProps> = ({
                 },
               }}
             >
-              <Button sx={{ flex: "1 1 0" }}>View</Button>
+              <Button disabled={parentLoading} sx={{ flex: "1 1 0" }}>
+                View
+              </Button>
             </Link>
           )}
         </ButtonGroup>

@@ -2,7 +2,15 @@
 import ContactCard from "@/components/ContactsCard";
 import { components } from "@/interfaces/db_interfaces";
 import { ContactType } from "@/interfaces/enums";
-import { HttpMethod, getData, getUser } from "@/utils/api";
+import {
+  HttpMethod,
+  getAreas,
+  getBudgetRanges,
+  getData,
+  getEmployees,
+  getProjects,
+  getUser,
+} from "@/utils/api";
 import { isRefreshTokenExpired } from "@/utils/auth";
 import { formatBudgetRange } from "@/utils/format";
 import AddIcon from "@mui/icons-material/Add";
@@ -34,6 +42,7 @@ export default function HomePage() {
   }
   const [sortBy, setSortBy] = useState<string>("date");
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
+  const [reloadLeads, setReloadLeads] = useState<boolean>(false);
   const [user, setUser] = useState<components["schemas"]["Employee"]>();
   const [leads, setLeads] = useState<components["schemas"]["Lead"][]>([]);
   const [employees, setEmployees] = useState<
@@ -116,42 +125,14 @@ export default function HomePage() {
           setFiltersLoading(true);
           const userData = await getUser();
           setUser(userData);
-          const budgetData = await getData(
-            "/budget_ranges/",
-            HttpMethod.GET,
-            undefined,
-            undefined,
-            undefined,
-            signal
-          );
-          const locationsData = await getData(
-            "/areas/",
-            HttpMethod.GET,
-            undefined,
-            undefined,
-            undefined,
-            signal
-          );
-          const projectsData = await getData(
-            "/projects/",
-            HttpMethod.GET,
-            undefined,
-            undefined,
-            undefined,
-            signal
-          );
+          const budgetData = await getBudgetRanges(signal);
+          const locationsData = await getAreas(signal);
+          const projectsData = await getProjects(signal);
           // Handle the result
           SetBudgetRanges(budgetData);
           setLocations(locationsData);
           setProjects(projectsData);
-          const employeeData = await getData(
-            "/employees/",
-            HttpMethod.GET,
-            undefined,
-            undefined,
-            undefined,
-            signal
-          );
+          const employeeData = await getEmployees(signal);
           setEmployees(employeeData);
         } catch (error) {
           // Handle errors
@@ -219,7 +200,7 @@ export default function HomePage() {
       delayedFetch.cancel();
       controller.abort();
     };
-  }, [searchText, budgetRangeID, locationID, projectID]); // Empty dependency array ensures that the effect runs once after the initial render
+  }, [searchText, budgetRangeID, locationID, projectID, reloadLeads]); // Empty dependency array ensures that the effect runs once after the initial render
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", padding: 2 }}>
@@ -368,6 +349,9 @@ export default function HomePage() {
                   leadStatus={lead.status.id}
                   assignedToName={lead.assigned_to?.name}
                   assignedTo={lead.assigned_to_id}
+                  reload={reloadLeads}
+                  setReload={setReloadLeads}
+                  parentLoading={leadLoading}
                 />
               </Grid>
             ))

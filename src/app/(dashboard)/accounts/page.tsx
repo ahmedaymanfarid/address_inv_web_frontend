@@ -2,7 +2,14 @@
 import ContactCard from "@/components/ContactsCard";
 import { components } from "@/interfaces/db_interfaces";
 import { AccountStatus, ContactType } from "@/interfaces/enums";
-import { HttpMethod, getData } from "@/utils/api";
+import {
+  HttpMethod,
+  getAreas,
+  getBudgetRanges,
+  getData,
+  getEmployees,
+  getProjects,
+} from "@/utils/api";
 import { isRefreshTokenExpired } from "@/utils/auth";
 import { formatBudgetRange, formatNumber } from "@/utils/format";
 import AddIcon from "@mui/icons-material/Add";
@@ -28,7 +35,7 @@ export default function TasksPage() {
       window.location.href = "/sign-in";
     }
   }
-
+  const [accountReload, setAccountReload] = useState<boolean>(false);
   const [firstLoad, setFirstLoad] = useState<boolean>(true);
   const [employees, setEmployees] = useState<
     components["schemas"]["Employee"][]
@@ -86,43 +93,16 @@ export default function TasksPage() {
       const fetchInitialData = async () => {
         try {
           setFiltersLoading(true);
-          const budgetData = await getData(
-            "/budget_ranges/",
-            HttpMethod.GET,
-            undefined,
-            undefined,
-            undefined,
-            signal
-          );
-          const locationsData = await getData(
-            "/areas/",
-            HttpMethod.GET,
-            undefined,
-            undefined,
-            undefined,
-            signal
-          );
-          const projectsData = await getData(
-            "/projects/",
-            HttpMethod.GET,
-            undefined,
-            undefined,
-            undefined,
-            signal
-          );
+          const budgetData = await getBudgetRanges(signal);
+          const locationsData = await getAreas(signal);
+          const projectsData = await getProjects(signal);
           // Handle the result
           SetBudgetRanges(budgetData);
           setLocations(locationsData);
           setProjects(projectsData);
 
-          const employeeData = await getData(
-            "/employees/",
-            HttpMethod.GET,
-            undefined,
-            undefined,
-            undefined,
-            signal
-          );
+          const employeeData = await getEmployees(signal);
+
           setEmployees(employeeData);
         } catch (error) {
           // Handle errors
@@ -199,7 +179,7 @@ export default function TasksPage() {
       delayedFetch.cancel();
       controller.abort();
     };
-  }, [searchText, budgetRangeID, locationID, projectID]);
+  }, [searchText, budgetRangeID, locationID, projectID, accountReload]);
   return (
     <Box sx={{ display: "flex", flexDirection: "column", padding: 2 }}>
       <Grid container spacing={2} sx={{ mt: 2, mb: 4 }}>
@@ -224,7 +204,7 @@ export default function TasksPage() {
               <MenuItem>None</MenuItem>
               {budgetRanges.map((bg) => (
                 <MenuItem key={bg.id} value={bg.id}>
-                  {formatNumber(bg.min) + "-" + formatNumber(bg.max)}
+                  {formatBudgetRange(bg)}
                 </MenuItem>
               ))}
             </Select>
@@ -338,6 +318,9 @@ export default function TasksPage() {
                     accountStatus={account.status_id}
                     employees={employees}
                     leadType={account.lead.type_id}
+                    reload={accountReload}
+                    setReload={setAccountReload}
+                    parentLoading={accountLoading}
                   />
                 </Grid>
               ))}
@@ -363,6 +346,9 @@ export default function TasksPage() {
                     contactType={ContactType.SALES}
                     accountStatus={account.status_id}
                     assignedToName={account.assigned_to?.name}
+                    reload={accountReload}
+                    setReload={setAccountReload}
+                    parentLoading={accountLoading}
                   />
                 </Grid>
               ))}
@@ -420,6 +406,9 @@ export default function TasksPage() {
                     accountStatus={account.status_id}
                     employees={employees}
                     leadType={account.lead.type_id}
+                    reload={accountReload}
+                    setReload={setAccountReload}
+                    parentLoading={accountLoading}
                   />
                 </Grid>
               ))}
@@ -445,6 +434,9 @@ export default function TasksPage() {
                     contactType={ContactType.SALES}
                     accountStatus={account.status_id}
                     assignedToName={account.assigned_to?.name}
+                    reload={accountReload}
+                    setReload={setAccountReload}
+                    parentLoading={accountLoading}
                   />
                 </Grid>
               ))}
@@ -502,6 +494,9 @@ export default function TasksPage() {
                     accountStatus={account.status_id}
                     employees={employees}
                     leadType={account.lead.type_id}
+                    reload={accountReload}
+                    setReload={setAccountReload}
+                    parentLoading={accountLoading}
                   />
                 </Grid>
               ))}
@@ -527,6 +522,9 @@ export default function TasksPage() {
                     contactType={ContactType.SALES}
                     accountStatus={account.status_id}
                     assignedToName={account.assigned_to?.name}
+                    reload={accountReload}
+                    setReload={setAccountReload}
+                    parentLoading={accountLoading}
                   />
                 </Grid>
               ))}
@@ -583,6 +581,9 @@ export default function TasksPage() {
                     accountStatus={account.status_id}
                     employees={employees}
                     leadType={account.lead.type_id}
+                    reload={accountReload}
+                    setReload={setAccountReload}
+                    parentLoading={accountLoading}
                   />
                 </Grid>
               ))}
@@ -608,6 +609,9 @@ export default function TasksPage() {
                     contactType={ContactType.SALES}
                     accountStatus={account.status_id}
                     assignedToName={account.assigned_to?.name}
+                    reload={accountReload}
+                    setReload={setAccountReload}
+                    parentLoading={accountLoading}
                   />
                 </Grid>
               ))}
