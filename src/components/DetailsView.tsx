@@ -495,7 +495,9 @@ export default function DetailsView({
                   sx={viewOnlyStyle}
                   variant="standard"
                   disabled={!editing}
-                  defaultValue={lead?.type?.id}
+                  defaultValue={
+                    (lead as components["schemas"]["Lead"])?.type_id
+                  }
                   fullWidth
                   id="type"
                   label="Type"

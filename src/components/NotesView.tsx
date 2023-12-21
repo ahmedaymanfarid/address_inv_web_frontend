@@ -146,13 +146,18 @@ export default function NotesView({
                   type !== ContactType.SALES ? (
                     <Avatar>{note.added_by.name.charAt(0)}</Avatar>
                   ) : (
-                    <Avatar>{note.assigned_to.name.charAt(0)}</Avatar>
+                    <Avatar>
+                      {(
+                        note as unknown as components["schemas"]["SalesNotes"]
+                      )?.assigned_to.name.charAt(0)}
+                    </Avatar>
                   )
                 }
                 title={
                   type !== ContactType.SALES
                     ? note.added_by.name
-                    : note.assigned_to.name
+                    : (note as unknown as components["schemas"]["SalesNotes"])
+                        .assigned_to.name
                 }
                 subheader={formatReadableDate(dayjs(note.date_added))}
                 action={

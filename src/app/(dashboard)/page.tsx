@@ -8,11 +8,10 @@ import { formatReadableDate } from "@/utils/format";
 import AddIcon from "@mui/icons-material/Add";
 import DoNotDisturbIcon from "@mui/icons-material/DoNotDisturb";
 import TodayIcon from "@mui/icons-material/Today";
-import { Button, LinearProgress, Typography } from "@mui/material";
+import { Button, Grid, LinearProgress, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import Fab from "@mui/material/Fab";
 import TextField from "@mui/material/TextField";
-import Grid from "@mui/material/Unstable_Grid2";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -22,7 +21,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 export default function HomePage() {
   if (isRefreshTokenExpired()) {
-    window.location.href = "/sign-in";
+    if (typeof window !== "undefined") {
+      window.location.href = "/sign-in";
+    }
   }
 
   const [actions, setActions] = useState<components["schemas"]["Actions"]>();
@@ -37,7 +38,7 @@ export default function HomePage() {
   const handleSearchChange = (event: any) => {
     setSearchText(event.target.value);
   };
-  const [fabColor, setFabColor] = useState<string>("");
+  const [fabColor, setFabColor] = useState<string>("default");
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
@@ -46,7 +47,7 @@ export default function HomePage() {
       const fetchLeadData = async () => {
         try {
           setLoading(true);
-          if (date.isSame(new Date(), "day")) setFabColor("primary");
+          if (date?.isSame(new Date(), "day")) setFabColor("primary");
           else setFabColor("");
           const params = {
             day: date?.format("YYYY-MM-DD"),
@@ -98,17 +99,16 @@ export default function HomePage() {
               onChange={handleDateChange}
             />
           </Grid>
-          <Grid alignItems="center" container item>
+          <Grid alignItems="center" item>
             <Fab
               sx={{ ml: 2 }}
               onClick={() => setDate(dayjs(new Date()))}
-              color={fabColor}
               aria-label="today"
             >
               <TodayIcon />
             </Fab>
           </Grid>
-          <Grid sx={{ mx: 2 }} alignItems="center" container item>
+          <Grid sx={{ mx: 2 }} alignItems="center" item>
             <Link href="/actions/add">
               <Fab color="primary" aria-label="add">
                 <AddIcon />
@@ -123,12 +123,12 @@ export default function HomePage() {
           )}
         </Grid>
 
-        <Grid container rowSpacing={3} columnSpacing={3}>
-          <Grid container item xs={12}>
+        <Grid container spacing={3}>
+          <Grid container spacing={3} item xs={12}>
             <Grid item xs={12}>
               <h3>Calls</h3>
             </Grid>
-            {actions?.calls?.length > 0 ? (
+            {actions?.calls?.length ?? 0 > 0 ? (
               actions?.calls?.map((call) => (
                 <Grid key={call.id} item>
                   {call.sales_account ? (
@@ -170,12 +170,12 @@ export default function HomePage() {
             )}
           </Grid>
 
-          <Grid container item xs={12}>
+          <Grid container spacing={3} item xs={12}>
             <Grid item xs={12}>
               <h3>Meetings</h3>
             </Grid>
 
-            {actions?.meetings?.length > 0 ? (
+            {actions?.meetings?.length ?? 0 > 0 ? (
               actions?.meetings?.map((meeting) => (
                 <Grid key={meeting.id} item>
                   {meeting.sales_account ? (

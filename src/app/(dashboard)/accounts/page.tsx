@@ -24,7 +24,9 @@ import { useEffect, useState } from "react";
 
 export default function TasksPage() {
   if (isRefreshTokenExpired()) {
-    window.location.href = "/sign-in";
+    if (typeof window !== "undefined") {
+      window.location.href = "/sign-in";
+    }
   }
 
   const [firstLoad, setFirstLoad] = useState<boolean>(true);
@@ -328,7 +330,7 @@ export default function TasksPage() {
                     // area=Type={account.lead.interests.at(0)?.property_type?.type}
                     assignedTo={account.assigned_to_id}
                     budgetRange={formatBudgetRange(
-                      account.lead.interests.at(0)?.budget_range
+                      account.lead.interests.at(0)?.budget_range as any
                     )}
                     contactType={ContactType.COMPANY}
                     assignedToName={account.assigned_to?.name}
@@ -356,7 +358,7 @@ export default function TasksPage() {
                     project={account.interests.at(0)?.project?.name}
                     // areaType={account.interests.at(0)?.property_type?.type}
                     budgetRange={formatBudgetRange(
-                      account.interests.at(0)?.budget_range
+                      account.interests.at(0)?.budget_range as any
                     )}
                     contactType={ContactType.SALES}
                     accountStatus={account.status_id}
@@ -410,7 +412,7 @@ export default function TasksPage() {
                     // areaType={account.lead.interests.at(0)?.property_type?.type}
                     assignedTo={account.assigned_to_id}
                     budgetRange={formatBudgetRange(
-                      account.lead.interests.at(0)?.budget_range
+                      account.lead.interests.at(0)?.budget_range as any
                     )}
                     contactType={ContactType.COMPANY}
                     assignedToName={account.assigned_to?.name}
@@ -438,7 +440,7 @@ export default function TasksPage() {
                     project={account.interests.at(0)?.project?.name}
                     assignedTo={account.assigned_to_id}
                     budgetRange={formatBudgetRange(
-                      account.interests.at(0)?.budget_range
+                      account.interests.at(0)?.budget_range as any
                     )}
                     contactType={ContactType.SALES}
                     accountStatus={account.status_id}
@@ -492,7 +494,7 @@ export default function TasksPage() {
                     // areaType={account.lead.interests.at(0)?.property_type?.type}
                     assignedTo={account.assigned_to_id}
                     budgetRange={formatBudgetRange(
-                      account.lead.interests.at(0)?.budget_range
+                      account.lead.interests.at(0)?.budget_range as any
                     )}
                     contactType={ContactType.COMPANY}
                     assignedToName={account.assigned_to?.name}
@@ -520,7 +522,7 @@ export default function TasksPage() {
                     // areaType={account.interests.at(0)?.property_type?.type}
                     assignedTo={account.assigned_to_id}
                     budgetRange={formatBudgetRange(
-                      account.interests.at(0)?.budget_range
+                      account.interests.at(0)?.budget_range as any
                     )}
                     contactType={ContactType.SALES}
                     accountStatus={account.status_id}
@@ -573,7 +575,7 @@ export default function TasksPage() {
                     // areaType={account.lead.interests.at(0)?.property_type?.type}
                     assignedTo={account.assigned_to_id}
                     budgetRange={formatBudgetRange(
-                      account.lead.interests.at(0)?.budget_range
+                      account.lead.interests.at(0)?.budget_range as any
                     )}
                     contactType={ContactType.COMPANY}
                     assignedToName={account.assigned_to?.name}
@@ -601,7 +603,7 @@ export default function TasksPage() {
                     // areaType={account.interests.at(0)?.property_type?.type}
                     assignedTo={account.assigned_to_id}
                     budgetRange={formatBudgetRange(
-                      account.interests.at(0)?.budget_range
+                      account.interests.at(0)?.budget_range as any
                     )}
                     contactType={ContactType.SALES}
                     accountStatus={account.status_id}

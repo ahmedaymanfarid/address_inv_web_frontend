@@ -66,9 +66,15 @@ export interface paths {
   };
   "/accounts/sales": {
     get: operations["get_sales_accounts_accounts_sales_get"];
-    put: operations["update_sales_account_accounts_sales_put"];
     post: operations["create_sales_account_accounts_sales_post"];
     delete: operations["delete_sales_account_accounts_sales_delete"];
+  };
+  "/accounts/sales/{assigned_to}/{phone}": {
+    get: operations["get_sales_account_accounts_sales__assigned_to___phone__get"];
+    put: operations["update_sales_account_accounts_sales__assigned_to___phone__put"];
+  };
+  "/accounts/sales/actions/": {
+    get: operations["get_sales_account_actions_accounts_sales_actions__get"];
   };
   "/accounts/sales/status": {
     put: operations["update_sales_account_status_accounts_sales_status_put"];
@@ -78,15 +84,18 @@ export interface paths {
   };
   "/leads/": {
     get: operations["get_leads_leads__get"];
-    put: operations["update_lead_leads__put"];
     post: operations["create_lead_leads__post"];
     delete: operations["delete_lead_leads__delete"];
   };
   "/leads/{phone}": {
     get: operations["get_lead_leads__phone__get"];
+    put: operations["update_lead_leads__phone__put"];
   };
-  "/leads/{phone}/actions": {
-    get: operations["get_lead_actions_leads__phone__actions_get"];
+  "/leads/actions/": {
+    get: operations["get_lead_actions_leads_actions__get"];
+  };
+  "/accounts/company/{assigned_to}/{phone}": {
+    get: operations["get_company_account_accounts_company__assigned_to___phone__get"];
   };
   "/accounts/company": {
     get: operations["get_company_accounts_accounts_company_get"];
@@ -126,19 +135,17 @@ export interface paths {
     post: operations["create_company_meeting_accounts_company_meetings_post"];
     delete: operations["delete_company_meeting_accounts_company_meetings_delete"];
   };
-  "/accounts/sales/notes": {
-    get: operations["get_sales_notes_accounts_sales_notes_get"];
-    put: operations["update_sales_notes_accounts_sales_notes_put"];
-    post: operations["create_sales_notes_accounts_sales_notes_post"];
-    delete: operations["delete_sales_notes_accounts_sales_notes_delete"];
-  };
-  "/leads/notes": {
-    put: operations["update_lead_notes_leads_notes_put"];
-    post: operations["create_lead_notes_leads_notes_post"];
-    delete: operations["delete_lead_notes_leads_notes_delete"];
+  "/accounts/sales/notes/": {
+    get: operations["get_sales_notes_accounts_sales_notes__get"];
+    put: operations["update_sales_notes_accounts_sales_notes__put"];
+    post: operations["create_sales_notes_accounts_sales_notes__post"];
+    delete: operations["delete_sales_notes_accounts_sales_notes__delete"];
   };
   "/leads/notes/": {
     get: operations["get_lead_notes_leads_notes__get"];
+    put: operations["update_lead_notes_leads_notes__put"];
+    post: operations["create_lead_notes_leads_notes__post"];
+    delete: operations["delete_lead_notes_leads_notes__delete"];
   };
   "/budget_ranges/": {
     get: operations["get_budget_ranges_budget_ranges__get"];
@@ -220,7 +227,10 @@ export interface components {
     AdditionalPhone: {
       /** Phone Id */
       phone_id: number;
-      /** Extra Phone */
+      /**
+       * Extra Phone
+       * Format: phone
+       */
       extra_phone: string;
     };
     /** Area */
@@ -281,7 +291,10 @@ export interface components {
     CompanyAccount: {
       /** Assigned To Id */
       assigned_to_id: number;
-      /** Phone */
+      /**
+       * Phone
+       * Format: phone
+       */
       phone: string;
       /** Status Id */
       status_id: Partial<number> & Partial<unknown>;
@@ -317,7 +330,10 @@ export interface components {
       /** Status Id */
       status_id: Partial<components["schemas"]["CallStatus"]> &
         Partial<components["schemas"]["MeetingStatus"]>;
-      /** Company Account Phone */
+      /**
+       * Company Account Phone
+       * Format: phone
+       */
       company_account_phone: string;
       /** Id */
       id: number;
@@ -342,11 +358,14 @@ export interface components {
       /** Status Id */
       status_id: Partial<components["schemas"]["CallStatus"]> &
         Partial<components["schemas"]["MeetingStatus"]>;
-      /** Company Account Phone */
+      /**
+       * Company Account Phone
+       * Format: phone
+       */
       company_account_phone: string;
       /**
        * Date
-       * @default 2023-12-17T11:14:31.735829
+       * @default 2023-12-20T15:45:51.542527
        */
       date?: Partial<string> & Partial<unknown>;
     };
@@ -642,7 +661,10 @@ export interface components {
     Lead: {
       /** Name */
       name: string;
-      /** Phone */
+      /**
+       * Phone
+       * Format: phone
+       */
       phone: string;
       /** Type Id */
       type_id: number;
@@ -678,7 +700,10 @@ export interface components {
     LeadCreate: {
       /** Name */
       name: string;
-      /** Phone */
+      /**
+       * Phone
+       * Format: phone
+       */
       phone: string;
       /** Type Id */
       type_id: number;
@@ -713,7 +738,10 @@ export interface components {
       area_id: Partial<number> & Partial<unknown>;
       /** Project Id */
       project_id: Partial<number> & Partial<unknown>;
-      /** Lead Phone */
+      /**
+       * Lead Phone
+       * Format: phone
+       */
       lead_phone: string;
       /** Interest Id */
       interest_id: number;
@@ -754,7 +782,10 @@ export interface components {
     };
     /** LeadNotes */
     LeadNotes: {
-      /** Phone */
+      /**
+       * Phone
+       * Format: phone
+       */
       phone: string;
       /** Notes */
       notes: string;
@@ -769,7 +800,10 @@ export interface components {
     };
     /** LeadNotesCreate */
     LeadNotesCreate: {
-      /** Phone */
+      /**
+       * Phone
+       * Format: phone
+       */
       phone: string;
       /** Notes */
       notes: string;
@@ -870,7 +904,10 @@ export interface components {
     SalesAccount: {
       /** Name */
       name: string;
-      /** Phone */
+      /**
+       * Phone
+       * Format: phone
+       */
       phone: string;
       /** Assigned To Id */
       assigned_to_id?: Partial<number> & Partial<unknown>;
@@ -894,12 +931,20 @@ export interface components {
        * Format: date-time
        */
       date_added: string;
+      /**
+       * Additional Phones
+       * @default []
+       */
+      additional_phones?: components["schemas"]["AdditionalPhone"][];
     };
     /** SalesAccountCreate */
     SalesAccountCreate: {
       /** Name */
       name: string;
-      /** Phone */
+      /**
+       * Phone
+       * Format: phone
+       */
       phone: string;
       /** Assigned To Id */
       assigned_to_id?: Partial<number> & Partial<unknown>;
@@ -971,30 +1016,6 @@ export interface components {
       /** Project Id */
       project_id: Partial<number> & Partial<unknown>;
     };
-    /** SalesAccountSearch */
-    SalesAccountSearch: {
-      /** Search */
-      search?: Partial<string> & Partial<unknown>;
-      /** Assigned To Id */
-      assigned_to_id?: Partial<number> & Partial<unknown>;
-      /** Status Id */
-      status_id?: Partial<number> & Partial<unknown>;
-      /** Job Title Id */
-      job_title_id?: Partial<number> & Partial<unknown>;
-      gender?: Partial<components["schemas"]["Gender"]> & Partial<unknown>;
-      /** Budget Range Id */
-      budget_range_id?: Partial<number> & Partial<unknown>;
-      /** Area Range Id */
-      area_range_id?: Partial<number> & Partial<unknown>;
-      /** Delivery Range Id */
-      delivery_range_id?: Partial<number> & Partial<unknown>;
-      /** Payment Method Id */
-      payment_method_id?: Partial<number> & Partial<unknown>;
-      /** Area Id */
-      area_id?: Partial<number> & Partial<unknown>;
-      /** Project Id */
-      project_id?: Partial<number> & Partial<unknown>;
-    };
     /** SalesAccountUpdate */
     SalesAccountUpdate: {
       /** Name */
@@ -1006,11 +1027,8 @@ export interface components {
       job_title_id?: Partial<number> & Partial<unknown>;
       /** Status Id */
       status_id?: Partial<number> & Partial<unknown>;
-      /**
-       * Additional Phones
-       * @default []
-       */
-      additional_phones?: components["schemas"]["AdditionalPhone"][];
+      /** Additional Phones */
+      additional_phones?: Partial<string[]> & Partial<unknown>;
       /** Interests */
       interests?: Partial<
         components["schemas"]["SalesAccountInterestCreate"][]
@@ -1024,7 +1042,10 @@ export interface components {
       /** Status Id */
       status_id: Partial<components["schemas"]["CallStatus"]> &
         Partial<components["schemas"]["MeetingStatus"]>;
-      /** Sales Account Phone */
+      /**
+       * Sales Account Phone
+       * Format: phone
+       */
       sales_account_phone: string;
       /** Id */
       id: number;
@@ -1048,14 +1069,17 @@ export interface components {
     SalesActionCreate: {
       /** Assigned To Id */
       assigned_to_id: number;
-      /** Sales Account Phone */
+      /**
+       * Sales Account Phone
+       * Format: phone
+       */
       sales_account_phone: string;
       /** Status Id */
       status_id: Partial<components["schemas"]["CallStatus"]> &
         Partial<components["schemas"]["MeetingStatus"]>;
       /**
        * Date
-       * @default 2023-12-17T11:14:31.731737
+       * @default 2023-12-20T15:45:51.542527
        */
       date?: Partial<string> & Partial<unknown>;
     };
@@ -1085,7 +1109,10 @@ export interface components {
     SalesNotes: {
       /** Assigned To Id */
       assigned_to_id: number;
-      /** Phone */
+      /**
+       * Phone
+       * Format: phone
+       */
       phone: string;
       /** Notes */
       notes: string;
@@ -1102,21 +1129,13 @@ export interface components {
     SalesNotesCreate: {
       /** Assigned To Id */
       assigned_to_id: number;
-      /** Phone */
+      /**
+       * Phone
+       * Format: phone
+       */
       phone: string;
       /** Notes */
       notes: string;
-    };
-    /** SalesNotesSearch */
-    SalesNotesSearch: {
-      /** Phone */
-      phone?: Partial<string> & Partial<unknown>;
-      /** Assigned To Id */
-      assigned_to_id?: Partial<number> & Partial<unknown>;
-      /** Notes */
-      notes?: Partial<string> & Partial<unknown>;
-      /** Date Added */
-      date_added?: Partial<string> & Partial<unknown>;
     };
     /** SalesNotesUpdate */
     SalesNotesUpdate: {
@@ -1421,6 +1440,21 @@ export interface operations {
     };
   };
   get_sales_accounts_accounts_sales_get: {
+    parameters: {
+      query: {
+        search?: Partial<string> & Partial<unknown>;
+        assigned_to_id?: Partial<number> & Partial<unknown>;
+        status_id?: Partial<number> & Partial<unknown>;
+        job_title_id?: Partial<number> & Partial<unknown>;
+        gender?: Partial<components["schemas"]["Gender"]> & Partial<unknown>;
+        budget_range_id?: Partial<number> & Partial<unknown>;
+        area_range_id?: Partial<number> & Partial<unknown>;
+        delivery_range_id?: Partial<number> & Partial<unknown>;
+        payment_method_id?: Partial<number> & Partial<unknown>;
+        area_id?: Partial<number> & Partial<unknown>;
+        project_id?: Partial<number> & Partial<unknown>;
+      };
+    };
     responses: {
       /** Successful Response */
       200: {
@@ -1433,41 +1467,6 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": Partial<
-          components["schemas"]["SalesAccountSearch"]
-        > &
-          Partial<unknown>;
-      };
-    };
-  };
-  update_sales_account_accounts_sales_put: {
-    parameters: {
-      query: {
-        added_by: number;
-        phone: string;
-      };
-    };
-    responses: {
-      /** Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["SalesAccount"];
-        };
-      };
-      /** Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SalesAccountUpdate"];
       };
     };
   };
@@ -1500,7 +1499,7 @@ export interface operations {
   delete_sales_account_accounts_sales_delete: {
     parameters: {
       query: {
-        added_by: number;
+        assigned_to: number;
         phone: string;
       };
     };
@@ -1509,6 +1508,77 @@ export interface operations {
       200: {
         content: {
           "application/json": unknown;
+        };
+      };
+      /** Validation Error */
+      422: {
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_sales_account_accounts_sales__assigned_to___phone__get: {
+    parameters: {
+      path: {
+        assigned_to: number;
+        phone: string;
+      };
+    };
+    responses: {
+      /** Successful Response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SalesAccount"];
+        };
+      };
+      /** Validation Error */
+      422: {
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_sales_account_accounts_sales__assigned_to___phone__put: {
+    parameters: {
+      path: {
+        assigned_to: number;
+        phone: string;
+      };
+    };
+    responses: {
+      /** Successful Response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["SalesAccount"];
+        };
+      };
+      /** Validation Error */
+      422: {
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SalesAccountUpdate"];
+      };
+    };
+  };
+  get_sales_account_actions_accounts_sales_actions__get: {
+    parameters: {
+      query: {
+        assigned_to: number;
+        phone: string;
+      };
+    };
+    responses: {
+      /** Successful Response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["Actions"];
         };
       };
       /** Validation Error */
@@ -1579,6 +1649,7 @@ export interface operations {
         payment_method_id?: Partial<number> & Partial<unknown>;
         area_id?: Partial<number> & Partial<unknown>;
         property_type_id?: Partial<number> & Partial<unknown>;
+        project_id?: Partial<number> & Partial<unknown>;
       };
     };
     responses: {
@@ -1593,32 +1664,6 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
-      };
-    };
-  };
-  update_lead_leads__put: {
-    parameters: {
-      query: {
-        phone: string;
-      };
-    };
-    responses: {
-      /** Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["Lead"];
-        };
-      };
-      /** Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["LeadUpdate"];
       };
     };
   };
@@ -1690,7 +1735,7 @@ export interface operations {
       };
     };
   };
-  get_lead_actions_leads__phone__actions_get: {
+  update_lead_leads__phone__put: {
     parameters: {
       path: {
         phone: string;
@@ -1700,7 +1745,55 @@ export interface operations {
       /** Successful Response */
       200: {
         content: {
+          "application/json": components["schemas"]["Lead"];
+        };
+      };
+      /** Validation Error */
+      422: {
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LeadUpdate"];
+      };
+    };
+  };
+  get_lead_actions_leads_actions__get: {
+    parameters: {
+      query: {
+        phone: string;
+      };
+    };
+    responses: {
+      /** Successful Response */
+      200: {
+        content: {
           "application/json": components["schemas"]["Actions"];
+        };
+      };
+      /** Validation Error */
+      422: {
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  get_company_account_accounts_company__assigned_to___phone__get: {
+    parameters: {
+      path: {
+        assigned_to: number;
+        phone: string;
+      };
+    };
+    responses: {
+      /** Successful Response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CompanyAccount"];
         };
       };
       /** Validation Error */
@@ -1727,6 +1820,7 @@ export interface operations {
         payment_method_id?: Partial<number> & Partial<unknown>;
         area_id?: Partial<number> & Partial<unknown>;
         property_type_id?: Partial<number> & Partial<unknown>;
+        project_id?: Partial<number> & Partial<unknown>;
       };
     };
     responses: {
@@ -2216,7 +2310,15 @@ export interface operations {
       };
     };
   };
-  get_sales_notes_accounts_sales_notes_get: {
+  get_sales_notes_accounts_sales_notes__get: {
+    parameters: {
+      query: {
+        phone?: Partial<string> & Partial<unknown>;
+        assigned_to?: Partial<number> & Partial<unknown>;
+        notes?: Partial<string> & Partial<unknown>;
+        date_added?: Partial<string> & Partial<unknown>;
+      };
+    };
     responses: {
       /** Successful Response */
       200: {
@@ -2231,14 +2333,8 @@ export interface operations {
         };
       };
     };
-    requestBody: {
-      content: {
-        "application/json": Partial<components["schemas"]["SalesNotesSearch"]> &
-          Partial<unknown>;
-      };
-    };
   };
-  update_sales_notes_accounts_sales_notes_put: {
+  update_sales_notes_accounts_sales_notes__put: {
     parameters: {
       query: {
         id: number;
@@ -2264,7 +2360,7 @@ export interface operations {
       };
     };
   };
-  create_sales_notes_accounts_sales_notes_post: {
+  create_sales_notes_accounts_sales_notes__post: {
     responses: {
       /** Successful Response */
       200: {
@@ -2285,75 +2381,7 @@ export interface operations {
       };
     };
   };
-  delete_sales_notes_accounts_sales_notes_delete: {
-    parameters: {
-      query: {
-        id: number;
-      };
-    };
-    responses: {
-      /** Successful Response */
-      200: {
-        content: {
-          "application/json": unknown;
-        };
-      };
-      /** Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  update_lead_notes_leads_notes_put: {
-    parameters: {
-      query: {
-        id: number;
-      };
-    };
-    responses: {
-      /** Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["LeadNotes"];
-        };
-      };
-      /** Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["LeadNotesUpdate"];
-      };
-    };
-  };
-  create_lead_notes_leads_notes_post: {
-    responses: {
-      /** Successful Response */
-      200: {
-        content: {
-          "application/json": components["schemas"]["LeadNotes"];
-        };
-      };
-      /** Validation Error */
-      422: {
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["LeadNotesCreate"];
-      };
-    };
-  };
-  delete_lead_notes_leads_notes_delete: {
+  delete_sales_notes_accounts_sales_notes__delete: {
     parameters: {
       query: {
         id: number;
@@ -2388,6 +2416,74 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["LeadNotes"][];
+        };
+      };
+      /** Validation Error */
+      422: {
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+  };
+  update_lead_notes_leads_notes__put: {
+    parameters: {
+      query: {
+        id: number;
+      };
+    };
+    responses: {
+      /** Successful Response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["LeadNotes"];
+        };
+      };
+      /** Validation Error */
+      422: {
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LeadNotesUpdate"];
+      };
+    };
+  };
+  create_lead_notes_leads_notes__post: {
+    responses: {
+      /** Successful Response */
+      200: {
+        content: {
+          "application/json": components["schemas"]["LeadNotes"];
+        };
+      };
+      /** Validation Error */
+      422: {
+        content: {
+          "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["LeadNotesCreate"];
+      };
+    };
+  };
+  delete_lead_notes_leads_notes__delete: {
+    parameters: {
+      query: {
+        id: number;
+      };
+    };
+    responses: {
+      /** Successful Response */
+      200: {
+        content: {
+          "application/json": unknown;
         };
       };
       /** Validation Error */

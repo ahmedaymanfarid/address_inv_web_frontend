@@ -1,18 +1,18 @@
 "use client";
 import ContactCard from "@/components/ContactsCard";
 import { components } from "@/interfaces/db_interfaces";
-import { ContactType, CreateType } from "@/interfaces/enums";
-import { AdminOwner } from "@/interfaces/scopes";
+import { ContactType } from "@/interfaces/enums";
 import { HttpMethod, getData, getUser } from "@/utils/api";
 import { isRefreshTokenExpired } from "@/utils/auth";
-import { formatBudgetRange, formatNumber } from "@/utils/format";
-import { Create } from "@mui/icons-material";
+import { formatBudgetRange } from "@/utils/format";
 import AddIcon from "@mui/icons-material/Add";
 import DoNotDisturbIcon from "@mui/icons-material/DoNotDisturb";
+import SortIcon from "@mui/icons-material/Sort";
 import {
-  CircularProgress,
   Fab,
+  Grid,
   LinearProgress,
+  Menu,
   MenuItem,
   Typography,
 } from "@mui/material";
@@ -21,16 +21,19 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
-import Grid from "@mui/material/Unstable_Grid2";
+
 import debounce from "lodash.debounce";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function HomePage() {
   if (isRefreshTokenExpired()) {
-    window.location.href = "/sign-in";
+    if (typeof window !== "undefined") {
+      window.location.href = "/sign-in";
+    }
   }
-
+  const [sortBy, setSortBy] = useState<string>("date");
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [user, setUser] = useState<components["schemas"]["Employee"]>();
   const [leads, setLeads] = useState<components["schemas"]["Lead"][]>([]);
   const [employees, setEmployees] = useState<
@@ -82,7 +85,14 @@ export default function HomePage() {
   const handleProjectChange = (event: any) => {
     setProjectID(event.target.value);
   };
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setMenuAnchor(event.currentTarget);
+  };
+  const handleMenuClose = () => {
+    setMenuAnchor(null);
 
+    // handleAssignClose();
+  };
   // const handlePropertyTypeChange = (event: any) => {
   //   setPropertyTypeID(event.target.value);
   //   setPropertyType(event.target.value);
@@ -235,7 +245,7 @@ export default function HomePage() {
               <MenuItem>None</MenuItem>
               {budgetRanges.map((bg) => (
                 <MenuItem key={bg.id} value={bg.id}>
-                  {formatNumber(bg.min) + "-" + formatNumber(bg.max)}
+                  {formatBudgetRange(bg)}
                 </MenuItem>
               ))}
             </Select>
@@ -277,7 +287,34 @@ export default function HomePage() {
             </Select>
           </FormControl>
         </Grid>
-        <Grid sx={{ mx: 2 }} alignItems="center" container item>
+        <Grid sx={{ ml: 1 }} alignItems="center" item>
+          <Fab onClick={handleMenuClick}>
+            <SortIcon />
+          </Fab>
+          <Menu
+            anchorEl={menuAnchor}
+            open={Boolean(menuAnchor)}
+            onClose={handleMenuClose}
+          >
+            <MenuItem
+              onClick={() => {
+                setSortBy("name");
+                handleMenuClose();
+              }}
+            >
+              Name
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setSortBy("date");
+                handleMenuClose();
+              }}
+            >
+              Date Added
+            </MenuItem>
+          </Menu>
+        </Grid>
+        <Grid sx={{ ml: 1 }} alignItems="center" item>
           <Link
             href={{
               pathname: "/leads/add",
@@ -292,6 +329,7 @@ export default function HomePage() {
             </Fab>
           </Link>
         </Grid>
+
         {(filtersLoading || leadLoading) && (
           <Grid item xs={12} alignItems={"center"} textAlign={"center"}>
             <LinearProgress />
@@ -301,27 +339,38 @@ export default function HomePage() {
       </Grid>
       <Grid container rowSpacing={3} columnSpacing={3}>
         {leads && leads.length > 0 ? (
-          leads.map((lead: components["schemas"]["Lead"]) => (
-            <Grid key={lead.id} item>
-              <ContactCard
-                name={lead.name}
-                // email={lead.email}
-                phone={lead.phone}
-                jobTitle={lead.job_title?.title}
-                area={lead.interests.at(0)?.area?.area}
-                project={lead.interests.at(0)?.project?.name}
-                // areaType={lead.interests.at(0)?.property_type?.type}
-                budgetRange={formatBudgetRange(
-                  lead.interests.at(0)?.budget_range
-                )}
-                contactType={ContactType.LEAD}
-                employees={employees}
-                leadStatus={lead.status.id}
-                assignedToName={lead.assigned_to?.name}
-                assignedTo={lead.assigned_to_id}
-              />
-            </Grid>
-          ))
+          leads
+            .sort((a: any, b: any) => {
+              if (sortBy === "name") {
+                return a.name.localeCompare(b.name);
+              } else if (sortBy === "date") {
+                return (
+                  new Date(b.date_added).getTime() -
+                  new Date(a.date_added).getTime()
+                );
+              }
+            })
+            .map((lead: components["schemas"]["Lead"]) => (
+              <Grid key={lead.phone} item>
+                <ContactCard
+                  name={lead.name}
+                  // email={lead.email}
+                  phone={lead.phone}
+                  jobTitle={lead.job_title?.title}
+                  area={lead.interests.at(0)?.area?.area}
+                  project={lead.interests.at(0)?.project?.name}
+                  // areaType={lead.interests.at(0)?.property_type?.type}
+                  budgetRange={formatBudgetRange(
+                    lead.interests.at(0)?.budget_range as any
+                  )}
+                  contactType={ContactType.LEAD}
+                  employees={employees}
+                  leadStatus={lead.status.id}
+                  assignedToName={lead.assigned_to?.name}
+                  assignedTo={lead.assigned_to_id}
+                />
+              </Grid>
+            ))
         ) : (
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <DoNotDisturbIcon color="action" sx={{ mr: 1 }} />

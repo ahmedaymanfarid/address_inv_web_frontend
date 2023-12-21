@@ -41,19 +41,29 @@ export const signin = async (
 };
 
 export const getAccessToken = (): string | null => {
-  return localStorage.getItem("access_token");
+  if (typeof window !== "undefined") {
+    return window.localStorage.getItem("access_token");
+  }
+  return null;
 };
 
 export const setAccessToken = (token: string): void => {
-  localStorage.setItem("access_token", token);
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem("access_token", token);
+  }
 };
 
 export const getRefreshToken = (): string | null => {
-  return localStorage.getItem("refresh_token");
+  if (typeof window !== "undefined") {
+    return window.localStorage.getItem("refresh_token");
+  }
+  return null;
 };
 
 export const setRefreshToken = (token: string): void => {
-  localStorage.setItem("refresh_token", token);
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem("refresh_token", token);
+  }
 };
 
 export const isAccessTokenExpired = (): boolean => {
@@ -116,12 +126,14 @@ export const refreshTokens = async () => {
 
 export const signout = (): void => {
   // Remove tokens from localStorage
-  localStorage.removeItem("access_token");
-  localStorage.removeItem("refresh_token");
-  sessionStorage.removeItem("employee");
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    sessionStorage.removeItem("employee");
 
-  // Redirect to the home page
-  window.location.href = "/sign-in";
+    // Redirect to the home page
+    window.location.href = "/sign-in";
+  }
 };
 
 export const getValidToken = async (): Promise<string | null> => {

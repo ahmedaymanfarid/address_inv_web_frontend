@@ -296,6 +296,7 @@ export default function AddLead() {
           />
 
           <MuiPhoneNumber
+            onChange={(value) => console.log(value)}
             disabled={loading}
             margin="normal"
             required

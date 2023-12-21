@@ -33,7 +33,7 @@ export const formatNumber = (num?: number): string | void => {
 };
 
 export const formatBudgetRange = (
-  budgetRange: components["schemas"]["RangeInt"] | undefined
+  budgetRange: components["schemas"]["RangeInt"]
 ): string | undefined => {
   if (!budgetRange) return undefined;
   const { min, max } = budgetRange;
@@ -57,7 +57,8 @@ export const formatDeliveryRange = (
   }
 };
 
-export const formatReadableDate = (date: Dayjs): string => {
+export const formatReadableDate = (date: Dayjs | null): string => {
+  if (date === null) return "";
   const today = dayjs();
 
   if (date.isSame(today, "day")) {
