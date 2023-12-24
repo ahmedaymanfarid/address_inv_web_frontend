@@ -51,7 +51,6 @@ export default function HomePage() {
   const [budgetRanges, SetBudgetRanges] = useState<
     components["schemas"]["RangeMoney"][]
   >([]);
-  const [budget, setBudget] = useState("");
   const [budgetRangeID, setBudgetRangeID] = useState<number>();
   const [locations, setLocations] = useState<components["schemas"]["Area"][]>(
     []
@@ -84,7 +83,6 @@ export default function HomePage() {
 
   const handleBudgetChange = (event: any) => {
     setBudgetRangeID(event.target.value);
-    setBudget(event.target.value);
   };
 
   const handleLocationChange = (event: any) => {
@@ -200,7 +198,7 @@ export default function HomePage() {
       delayedFetch.cancel();
       controller.abort();
     };
-  }, [searchText, budgetRangeID, locationID, projectID, reloadLeads]); // Empty dependency array ensures that the effect runs once after the initial render
+  }, [reloadLeads]); // Empty dependency array ensures that the effect runs once after the initial render
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", padding: 2 }}>
@@ -219,7 +217,7 @@ export default function HomePage() {
             <InputLabel>Budget</InputLabel>
             <Select
               sx={{ minWidth: 200 }}
-              value={budget}
+              value={budgetRangeID}
               onChange={handleBudgetChange}
               label="Budget"
             >
@@ -321,6 +319,25 @@ export default function HomePage() {
       <Grid container rowSpacing={3} columnSpacing={3}>
         {leads && leads.length > 0 ? (
           leads
+            .filter((lead: components["schemas"]["Lead"]) => {
+              let include = true;
+              if (searchText != "") {
+                include &&=
+                  lead.name.toLowerCase().includes(searchText.toLowerCase()) ||
+                  lead.phone.toLowerCase().includes(searchText.toLowerCase());
+              }
+              if (budgetRangeID) {
+                include &&=
+                  lead.interests.at(0)?.budget_range?.id === budgetRangeID;
+              }
+              if (locationID) {
+                include &&= lead.interests.at(0)?.area?.id === locationID;
+              }
+              if (projectID !== undefined && projectID !== -1) {
+                include &&= lead.interests.at(0)?.project?.id === projectID;
+              }
+              return include;
+            })
             .sort((a: any, b: any) => {
               if (sortBy === "name") {
                 return a.name.localeCompare(b.name);

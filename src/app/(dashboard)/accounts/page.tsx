@@ -51,7 +51,6 @@ export default function TasksPage() {
   const [budgetRanges, SetBudgetRanges] = useState<
     components["schemas"]["RangeMoney"][]
   >([]);
-  const [budget, setBudget] = useState("");
   const [budgetRangeID, setBudgetRangeID] = useState<number>();
 
   const [areas, setAreas] = useState<components["schemas"]["Area"][]>([]);
@@ -79,7 +78,6 @@ export default function TasksPage() {
 
   const handleBudgetChange = (event: any) => {
     setBudgetRangeID(event.target.value);
-    setBudget(event.target.value);
   };
 
   const [filtersLoading, setFiltersLoading] = useState<boolean>(false);
@@ -179,7 +177,7 @@ export default function TasksPage() {
       delayedFetch.cancel();
       controller.abort();
     };
-  }, [searchText, budgetRangeID, locationID, projectID, accountReload]);
+  }, [accountReload]);
   return (
     <Box sx={{ display: "flex", flexDirection: "column", padding: 2 }}>
       <Grid container spacing={2} sx={{ mt: 2, mb: 4 }}>
@@ -197,7 +195,7 @@ export default function TasksPage() {
             <InputLabel>Budget</InputLabel>
             <Select
               sx={{ minWidth: 200 }}
-              value={budget}
+              value={budgetRangeID}
               onChange={handleBudgetChange}
               label="Budget"
             >
@@ -296,7 +294,30 @@ export default function TasksPage() {
           {companyAccounts &&
             companyAccounts
               .filter((account) => {
-                if (account.status_id == AccountStatus.NEW) return account;
+                let include = account.status_id == AccountStatus.NEW;
+                if (searchText != "") {
+                  include &&=
+                    account.lead.name
+                      .toLowerCase()
+                      .includes(searchText.toLowerCase()) ||
+                    account.phone
+                      .toLowerCase()
+                      .includes(searchText.toLowerCase());
+                }
+                if (budgetRangeID) {
+                  include &&=
+                    account.lead.interests.at(0)?.budget_range?.id ==
+                    budgetRangeID;
+                }
+                if (locationID) {
+                  include &&=
+                    account.lead.interests.at(0)?.area?.id == locationID;
+                }
+                if (projectID !== undefined && projectID !== -1) {
+                  include &&=
+                    account.lead.interests.at(0)?.project?.id == projectID;
+                }
+                return include;
               })
               .map((account) => (
                 <Grid key={`${account.assigned_to_id}-${account.phone}`} item>
@@ -327,7 +348,27 @@ export default function TasksPage() {
           {salesAccounts &&
             salesAccounts
               .filter((account) => {
-                if (account.status_id == AccountStatus.NEW) return account;
+                let include = account.status_id == AccountStatus.NEW;
+                if (searchText != "") {
+                  include &&=
+                    account.name
+                      .toLowerCase()
+                      .includes(searchText.toLowerCase()) ||
+                    account.phone
+                      .toLowerCase()
+                      .includes(searchText.toLowerCase());
+                }
+                if (budgetRangeID) {
+                  include &&=
+                    account.interests.at(0)?.budget_range?.id == budgetRangeID;
+                }
+                if (locationID) {
+                  include &&= account.interests.at(0)?.area?.id == locationID;
+                }
+                if (projectID !== undefined && projectID !== -1) {
+                  include &&= account.interests.at(0)?.project?.id == projectID;
+                }
+                return include;
               })
               .map((account) => (
                 <Grid key={`${account.assigned_to_id}-${account.phone}`} item>
@@ -384,7 +425,30 @@ export default function TasksPage() {
           {companyAccounts &&
             companyAccounts
               .filter((account) => {
-                if (account.status_id == AccountStatus.HOT) return account;
+                let include = account.status_id == AccountStatus.HOT;
+                if (searchText != "") {
+                  include &&=
+                    account.lead.name
+                      .toLowerCase()
+                      .includes(searchText.toLowerCase()) ||
+                    account.phone
+                      .toLowerCase()
+                      .includes(searchText.toLowerCase());
+                }
+                if (budgetRangeID) {
+                  include &&=
+                    account.lead.interests.at(0)?.budget_range?.id ==
+                    budgetRangeID;
+                }
+                if (locationID) {
+                  include &&=
+                    account.lead.interests.at(0)?.area?.id == locationID;
+                }
+                if (projectID !== undefined && projectID !== -1) {
+                  include &&=
+                    account.lead.interests.at(0)?.project?.id == projectID;
+                }
+                return include;
               })
               .map((account) => (
                 <Grid key={`${account.assigned_to_id}-${account.phone}`} item>
@@ -415,7 +479,27 @@ export default function TasksPage() {
           {salesAccounts &&
             salesAccounts
               .filter((account) => {
-                if (account.status_id == AccountStatus.HOT) return account;
+                let include = account.status_id == AccountStatus.HOT;
+                if (searchText != "") {
+                  include &&=
+                    account.name
+                      .toLowerCase()
+                      .includes(searchText.toLowerCase()) ||
+                    account.phone
+                      .toLowerCase()
+                      .includes(searchText.toLowerCase());
+                }
+                if (budgetRangeID) {
+                  include &&=
+                    account.interests.at(0)?.budget_range?.id == budgetRangeID;
+                }
+                if (locationID) {
+                  include &&= account.interests.at(0)?.area?.id == locationID;
+                }
+                if (projectID !== undefined && projectID !== -1) {
+                  include &&= account.interests.at(0)?.project?.id == projectID;
+                }
+                return include;
               })
               .map((account) => (
                 <Grid key={`${account.assigned_to_id}-${account.phone}`} item>
@@ -472,7 +556,30 @@ export default function TasksPage() {
           {companyAccounts &&
             companyAccounts
               .filter((account) => {
-                if (account.status_id == AccountStatus.WARM) return account;
+                let include = account.status_id == AccountStatus.WARM;
+                if (searchText != "") {
+                  include &&=
+                    account.lead.name
+                      .toLowerCase()
+                      .includes(searchText.toLowerCase()) ||
+                    account.phone
+                      .toLowerCase()
+                      .includes(searchText.toLowerCase());
+                }
+                if (budgetRangeID) {
+                  include &&=
+                    account.lead.interests.at(0)?.budget_range?.id ==
+                    budgetRangeID;
+                }
+                if (locationID) {
+                  include &&=
+                    account.lead.interests.at(0)?.area?.id == locationID;
+                }
+                if (projectID !== undefined && projectID !== -1) {
+                  include &&=
+                    account.lead.interests.at(0)?.project?.id == projectID;
+                }
+                return include;
               })
               .map((account) => (
                 <Grid key={`${account.assigned_to_id}-${account.phone}`} item>
@@ -503,7 +610,27 @@ export default function TasksPage() {
           {salesAccounts &&
             salesAccounts
               .filter((account) => {
-                if (account.status_id == AccountStatus.WARM) return account;
+                let include = account.status_id == AccountStatus.WARM;
+                if (searchText != "") {
+                  include &&=
+                    account.name
+                      .toLowerCase()
+                      .includes(searchText.toLowerCase()) ||
+                    account.phone
+                      .toLowerCase()
+                      .includes(searchText.toLowerCase());
+                }
+                if (budgetRangeID) {
+                  include &&=
+                    account.interests.at(0)?.budget_range?.id == budgetRangeID;
+                }
+                if (locationID) {
+                  include &&= account.interests.at(0)?.area?.id == locationID;
+                }
+                if (projectID !== undefined && projectID !== -1) {
+                  include &&= account.interests.at(0)?.project?.id == projectID;
+                }
+                return include;
               })
               .map((account) => (
                 <Grid key={`${account.assigned_to_id}-${account.phone}`} item>
@@ -559,7 +686,30 @@ export default function TasksPage() {
           {companyAccounts &&
             companyAccounts
               .filter((account) => {
-                if (account.status_id == AccountStatus.COLD) return account;
+                let include = account.status_id == AccountStatus.COLD;
+                if (searchText != "") {
+                  include &&=
+                    account.lead.name
+                      .toLowerCase()
+                      .includes(searchText.toLowerCase()) ||
+                    account.phone
+                      .toLowerCase()
+                      .includes(searchText.toLowerCase());
+                }
+                if (budgetRangeID) {
+                  include &&=
+                    account.lead.interests.at(0)?.budget_range?.id ==
+                    budgetRangeID;
+                }
+                if (locationID) {
+                  include &&=
+                    account.lead.interests.at(0)?.area?.id == locationID;
+                }
+                if (projectID !== undefined && projectID !== -1) {
+                  include &&=
+                    account.lead.interests.at(0)?.project?.id == projectID;
+                }
+                return include;
               })
               .map((account) => (
                 <Grid key={`${account.assigned_to_id}-${account.phone}`} item>
@@ -590,7 +740,27 @@ export default function TasksPage() {
           {salesAccounts &&
             salesAccounts
               .filter((account) => {
-                if (account.status_id == AccountStatus.COLD) return account;
+                let include = account.status_id == AccountStatus.COLD;
+                if (searchText != "") {
+                  include &&=
+                    account.name
+                      .toLowerCase()
+                      .includes(searchText.toLowerCase()) ||
+                    account.phone
+                      .toLowerCase()
+                      .includes(searchText.toLowerCase());
+                }
+                if (budgetRangeID) {
+                  include &&=
+                    account.interests.at(0)?.budget_range?.id == budgetRangeID;
+                }
+                if (locationID) {
+                  include &&= account.interests.at(0)?.area?.id == locationID;
+                }
+                if (projectID !== undefined && projectID !== -1) {
+                  include &&= account.interests.at(0)?.project?.id == projectID;
+                }
+                return include;
               })
               .map((account) => (
                 <Grid key={`${account.assigned_to_id}-${account.phone}`} item>
