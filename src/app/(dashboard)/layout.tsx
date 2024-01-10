@@ -48,7 +48,7 @@ export default function RootLayout({
           <AppBar position="fixed" sx={{ zIndex: 2000 }}>
             <Toolbar sx={{ backgroundColor: "black" }}>
               <Image
-                src="/address_logo.png"
+                src={process.env.BASE_PATH + "/address_logo.png"}
                 alt="Address Logo"
                 width={189}
                 height={70}

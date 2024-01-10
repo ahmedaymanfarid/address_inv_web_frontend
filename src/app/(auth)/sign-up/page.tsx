@@ -1,7 +1,8 @@
 "use client";
+import { Copyright } from "@/components/Copyright";
 import { HttpMethod, getData } from "@/utils/api";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import { LinearProgress } from "@mui/material";
+import { Card, LinearProgress } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
@@ -9,28 +10,12 @@ import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import CssBaseline from "@mui/material/CssBaseline";
 import Grid from "@mui/material/Grid";
-import Link from "@mui/material/Link";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import Image from "next/image";
+import Link from "next/link";
 import * as React from "react";
 
-function Copyright(props: any) {
-  return (
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      align="center"
-      {...props}
-    >
-      {"Copyright © "}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
 export default function SignUp() {
   const [error, setError] = React.useState<string>("");
   const [loading, setLoading] = React.useState<boolean>(false);
@@ -87,103 +72,127 @@ export default function SignUp() {
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
-      <Box
+      <Card
+        raised
         sx={{
-          marginTop: 8,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
+          borderRadius: 4,
+          marginTop: 5,
+          paddingX: 5,
+          paddingBottom: 3,
+          paddingTop: 5,
+          width: 450,
         }}
       >
-        <Avatar sx={{ m: 1, bgcolor: "primary.main" }}>
-          <LockOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Sign up
-        </Typography>
-        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              {loading && <LinearProgress />}
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                required
-                disabled={loading}
-                id="business-email"
-                label="Business Email Address"
-                name="business-email"
-                autoComplete="email"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                disabled={loading}
-                id="personal-email"
-                label="Personal Email Address"
-                name="personal-email"
-                autoComplete="email"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                disabled={loading}
-                id="personal-phone"
-                label="Personal Phone Number"
-                name="personal-phone"
-                autoComplete="phone"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                required
-                fullWidth
-                disabled={loading}
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="new-password"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                required
-                fullWidth
-                disabled={loading}
-                name="confirm-password"
-                label="Confirm Password"
-                type="password"
-                id="confirm-password"
-                autoComplete="new-password"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              {error && <Alert severity="error">{error}</Alert>}
-            </Grid>
-          </Grid>
-          <Button
-            type="submit"
-            fullWidth
-            disabled={loading}
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Image
+            src={process.env.BASE_PATH + "/logo_text.png"}
+            width={396}
+            height={128.7}
+            alt="Address Investments Logo"
+          />
+          <Avatar sx={{ m: 1, bgcolor: "primary.main" }}>
+            <LockOutlinedIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            Sign up
+          </Typography>
+          <Box
+            component="form"
+            noValidate
+            onSubmit={handleSubmit}
+            sx={{ mt: 3 }}
           >
-            Sign Up
-          </Button>
-          <Grid container justifyContent="flex-end">
-            <Grid item>
-              <Link href="/sign-in" variant="body2">
-                Already have an account? Sign in
-              </Link>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                {loading && <LinearProgress />}
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  required
+                  disabled={loading}
+                  id="business-email"
+                  label="Business Email Address"
+                  name="business-email"
+                  autoComplete="email"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  disabled={loading}
+                  id="personal-email"
+                  label="Personal Email Address"
+                  name="personal-email"
+                  autoComplete="email"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  disabled={loading}
+                  id="personal-phone"
+                  label="Personal Phone Number"
+                  name="personal-phone"
+                  autoComplete="phone"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  disabled={loading}
+                  name="password"
+                  label="Password"
+                  type="password"
+                  id="password"
+                  autoComplete="new-password"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  disabled={loading}
+                  name="confirm-password"
+                  label="Confirm Password"
+                  type="password"
+                  id="confirm-password"
+                  autoComplete="new-password"
+                />
+              </Grid>
+              <Grid item xs={12}>
+                {error && <Alert severity="error">{error}</Alert>}
+              </Grid>
             </Grid>
-          </Grid>
+            <Button
+              type="submit"
+              fullWidth
+              disabled={loading}
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+            >
+              Sign Up
+            </Button>
+            <Grid container justifyContent="flex-end">
+              <Grid item>
+                <Typography variant="body2">
+                  <Link style={{ color: "inherit" }} href="/sign-in">
+                    Already have an account? Sign in
+                  </Link>
+                </Typography>
+              </Grid>
+            </Grid>
+          </Box>
         </Box>
-      </Box>
-      <Copyright sx={{ mt: 5 }} />
+        <Copyright sx={{ mt: 5 }} />
+      </Card>
     </Container>
   );
 }

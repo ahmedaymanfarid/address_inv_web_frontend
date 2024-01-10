@@ -1,8 +1,8 @@
 import ThemeRegistry from "@/components/ThemeRegistry/ThemeRegistry";
 
 export const metadata = {
-  title: "The Address - Amr El Sheikh",
-  description: "The Address - Amr El Sheikh",
+  title: "Sign Up - Amr El Sheikh",
+  description: "Sign Up - Amr El Sheikh",
 };
 
 export default function RootLayout({
@@ -12,7 +12,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body style={{ backgroundColor: "black" }}>
         <ThemeRegistry>{children}</ThemeRegistry>
       </body>
     </html>
