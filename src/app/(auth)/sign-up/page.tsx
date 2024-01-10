@@ -81,7 +81,7 @@ export default function SignUp() {
     } finally {
       setLoading(false);
     }
-    window.location.href = "/sign-in";
+    window.location.href = process.env.BASE_PATH + "/sign-in";
   };
 
   return (

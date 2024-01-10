@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  basePath: process.env.BASE_PATH,
   reactStrictMode: true,
   swcMinify: true,
   modularizeImports: {
@@ -7,18 +8,9 @@ const nextConfig = {
       transform: "@mui/icons-material/{{member}}",
     },
   },
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "source.unsplash.com",
-        port: "",
-        pathname: "/random",
-      },
-    ],
-  },
   env: {
     API_URL: process.env.API_URL,
+    BASE_PATH: process.env.BASE_PATH,
   },
 };
 

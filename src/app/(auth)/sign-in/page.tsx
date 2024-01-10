@@ -41,7 +41,7 @@ const defaultTheme = createTheme();
 export default function SignIn() {
   const [error, setError] = React.useState<string>("");
   if (!isRefreshTokenExpired()) {
-    window.location.href = "/";
+    window.location.href = process.env.BASE_PATH + "/";
   }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -58,7 +58,7 @@ export default function SignIn() {
       setError(error.message);
       return;
     }
-    window.location.href = "/";
+    window.location.href = process.env.BASE_PATH + "/";
   };
 
   return (

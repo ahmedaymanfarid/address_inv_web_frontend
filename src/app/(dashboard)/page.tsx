@@ -22,7 +22,7 @@ import { useEffect, useState } from "react";
 export default function HomePage() {
   if (isRefreshTokenExpired()) {
     if (typeof window !== "undefined") {
-      window.location.href = "/sign-in";
+      window.location.href = process.env.BASE_PATH + "/sign-in";
     }
   }
 

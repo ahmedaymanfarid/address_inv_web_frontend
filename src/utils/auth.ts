@@ -132,7 +132,7 @@ export const signout = (): void => {
     sessionStorage.removeItem("employee");
 
     // Redirect to the home page
-    window.location.href = "/sign-in";
+    window.location.href = process.env.BASE_PATH + "/sign-in";
   }
 };
 

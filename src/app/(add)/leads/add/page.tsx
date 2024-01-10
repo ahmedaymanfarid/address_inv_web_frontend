@@ -229,9 +229,9 @@ export default function AddLead() {
     await getData(endpoint, HttpMethod.POST, params, body, handleFetchError)
       .then((data) => {
         if (type !== CreateType.PERSONAL) {
-          window.location.href = "/leads";
+          window.location.href = process.env.BASE_PATH + "/leads";
         } else {
-          window.location.href = "/accounts";
+          window.location.href = process.env.BASE_PATH + "/accounts";
         }
       })
       .catch((error) => {

@@ -198,7 +198,7 @@ export default function AddAction() {
     if (followUpEnabled) {
       await createFollowUpAction(data);
     }
-    window.location.href = "/";
+    window.location.href = process.env.BASE_PATH + "/";
   };
 
   React.useEffect(() => {
