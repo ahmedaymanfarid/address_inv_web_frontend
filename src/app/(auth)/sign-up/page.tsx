@@ -91,7 +91,7 @@ export default function SignUp() {
           }}
         >
           <Image
-            src={process.env.BASE_PATH + "/logo_text.png"}
+            src={"/app/logo_text.png"}
             width={396}
             height={128.7}
             alt="Address Investments Logo"

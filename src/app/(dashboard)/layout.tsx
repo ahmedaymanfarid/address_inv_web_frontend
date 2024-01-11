@@ -34,8 +34,6 @@ const LINKS = [
   { text: "Accounts", href: "/accounts", icon: ContactsIcon },
 ];
 
-const PLACEHOLDER_LINKS = [{ text: "My Profile", icon: SupportIcon }];
-
 export default function RootLayout({
   children,
 }: {
@@ -48,7 +46,7 @@ export default function RootLayout({
           <AppBar position="fixed" sx={{ zIndex: 2000 }}>
             <Toolbar sx={{ backgroundColor: "black" }}>
               <Image
-                src={process.env.BASE_PATH + "/address_logo.png"}
+                src={"/app/address_logo.png"}
                 alt="Address Logo"
                 width={189}
                 height={70}
